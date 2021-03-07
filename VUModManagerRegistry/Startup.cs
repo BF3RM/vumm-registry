@@ -30,7 +30,7 @@ namespace VUModManagerRegistry
         {
             services.AddDbContext<RegistryContext>(options =>
             {
-                options.UseInMemoryDatabase("VUMMRegistry");
+                options.UseNpgsql(Configuration.GetConnectionString("RegistryDatabase"));
             });
             
             services.AddControllers();
