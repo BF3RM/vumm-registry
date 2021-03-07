@@ -23,6 +23,7 @@ namespace VUModManagerRegistry.Controllers
         {
             var mod = await _context.Mods
                 .Include(m => m.Versions)
+                .Include(m => m.Tags)
                 .SingleOrDefaultAsync(m => m.Name == name);
             
             if (mod == null)
@@ -62,8 +63,7 @@ namespace VUModManagerRegistry.Controllers
                 {
                     Name = name,
                     Description = modVersionDto.Description,
-                    Author = modVersionDto.Author,
-                    Versions = new List<ModVersion>()
+                    Author = modVersionDto.Author
                 };
                 _context.Mods.Add(mod);
             }
@@ -74,9 +74,9 @@ namespace VUModManagerRegistry.Controllers
                 Description = modVersionDto.Description,
                 Author = modVersionDto.Author,
                 Version = modVersionDto.Version,
-                Dependencies = modVersionDto.Dependencies
+                Dependencies = modVersionDto.Dependencies,
+                ModId = mod.Id
             };
-            mod.Versions.Add(modVersion);
 
             _context.ModVersions.Add(modVersion);
             await _context.SaveChangesAsync();
@@ -93,6 +93,7 @@ namespace VUModManagerRegistry.Controllers
                 Name = mod.Name,
                 Description = mod.Description,
                 Author = mod.Author,
+                Tags = mod.Tags.ToDictionary(t => t.Name, t => t.Version),
                 Versions = mod.Versions
                     .ToDictionary(v => v.Version, VersionToDto)
             };

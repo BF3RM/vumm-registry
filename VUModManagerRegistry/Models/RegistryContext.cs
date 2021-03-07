@@ -9,6 +9,8 @@ namespace VUModManagerRegistry.Models
         public DbSet<Mod> Mods { get; set; }
         public DbSet<ModVersion> ModVersions { get; set; }
         
+        public DbSet<ModTag> ModTags { get; set; }
+        
         public RegistryContext(DbContextOptions<RegistryContext> options)
             : base(options)
         {
@@ -18,25 +20,38 @@ namespace VUModManagerRegistry.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Mod>()
-                .HasMany(m => m.Versions)
-                .WithOne();
+            modelBuilder.Entity<Mod>(entity =>
+            {
+                // Has many versions
+                entity
+                    .HasMany(m => m.Versions)
+                    .WithOne()
+                    .HasForeignKey(v => v.ModId);
 
-            modelBuilder.Entity<Mod>()
-                .Navigation(m => m.Versions)
-                .UsePropertyAccessMode(PropertyAccessMode.Property);
-            
+                // Has many tags
+                entity
+                    .HasMany(m => m.Tags)
+                    .WithOne()
+                    .HasForeignKey(t => t.ModId);
+            });
+
             modelBuilder.Entity<ModVersion>(entity =>
             {
-                entity.Property(v => v.Dependencies)
+                entity
+                    .Property(v => v.Dependencies)
                     .HasConversion(
                         v => JsonConvert.SerializeObject(v, Formatting.None),
                         v => JsonConvert.DeserializeObject<Dictionary<string, string>>(v)
                     );
 
-                entity.HasIndex(v => new {v.Name, v.Version})
+                entity
+                    .HasIndex(v => new {v.Name, v.Version})
                     .IsUnique();
             });
+
+            modelBuilder.Entity<ModTag>()
+                .HasIndex(t => new {t.ModId, t.Name, t.Version})
+                .IsUnique();
         }
     }
 }

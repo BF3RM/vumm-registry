@@ -21,5 +21,7 @@ namespace VUModManagerRegistry.Models
         public string Version { get; set; }
 
         public Dictionary<string, string> Dependencies { get; set; } = new();
+        
+        public long ModId { get; set; }
     }
 }
