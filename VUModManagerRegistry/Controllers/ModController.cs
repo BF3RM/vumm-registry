@@ -11,13 +11,28 @@ namespace VUModManagerRegistry.Controllers
     [Route("/api/mods")]
     public class ModController : ControllerBase
     {
-        private RegistryContext _context;
+        private readonly RegistryContext _context;
         
         public ModController(RegistryContext context)
         {
             _context = context;
         }
 
+        [HttpGet("{name}")]
+        public async Task<ActionResult<ModDto>> GetMod(string name)
+        {
+            var mod = await _context.Mods
+                .Include(m => m.Versions)
+                .SingleOrDefaultAsync(m => m.Name == name);
+            
+            if (mod == null)
+            {
+                return NotFound();
+            }
+
+            return ModToDto(mod);
+        }
+        
         [HttpGet("{name}/{version}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string version)
         {
@@ -40,6 +55,19 @@ namespace VUModManagerRegistry.Controllers
                 return BadRequest();
             }
 
+            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == name);
+            if (mod == null)
+            {
+                mod = new Mod
+                {
+                    Name = name,
+                    Description = modVersionDto.Description,
+                    Author = modVersionDto.Author,
+                    Versions = new List<ModVersion>()
+                };
+                _context.Mods.Add(mod);
+            }
+
             var modVersion = new ModVersion
             {
                 Name = modVersionDto.Name,
@@ -48,6 +76,7 @@ namespace VUModManagerRegistry.Controllers
                 Version = modVersionDto.Version,
                 Dependencies = modVersionDto.Dependencies
             };
+            mod.Versions.Add(modVersion);
 
             _context.ModVersions.Add(modVersion);
             await _context.SaveChangesAsync();
@@ -58,8 +87,18 @@ namespace VUModManagerRegistry.Controllers
                 VersionToDto(modVersion));
         }
 
+        private static ModDto ModToDto(Mod mod) =>
+            new()
+            {
+                Name = mod.Name,
+                Description = mod.Description,
+                Author = mod.Author,
+                Versions = mod.Versions
+                    .ToDictionary(v => v.Version, VersionToDto)
+            };
+        
         private static ModVersionDto VersionToDto(ModVersion modVersion) =>
-            new ModVersionDto
+            new()
             {
                 Name = modVersion.Name,
                 Description = modVersion.Description,

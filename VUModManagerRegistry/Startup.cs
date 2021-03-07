@@ -33,7 +33,10 @@ namespace VUModManagerRegistry
                 options.UseNpgsql(Configuration.GetConnectionString("RegistryDatabase"));
             });
             
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.IgnoreNullValues = true;
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "VUModManagerRegistry", Version = "v1"});
