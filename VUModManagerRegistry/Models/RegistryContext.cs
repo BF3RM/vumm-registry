@@ -18,6 +18,14 @@ namespace VUModManagerRegistry.Models
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Mod>()
+                .HasMany(m => m.Versions)
+                .WithOne();
+
+            modelBuilder.Entity<Mod>()
+                .Navigation(m => m.Versions)
+                .UsePropertyAccessMode(PropertyAccessMode.Property);
+            
             modelBuilder.Entity<ModVersion>(entity =>
             {
                 entity.Property(v => v.Dependencies)
