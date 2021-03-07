@@ -1,2 +1,2 @@
-# vumm-registry
-VU Mod Manager Registry
+# VU Mod Manager Registry
+Registry for the Venice Unleashed Mod Manager
