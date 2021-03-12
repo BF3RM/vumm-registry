@@ -67,7 +67,7 @@ namespace VUModManagerRegistry.Controllers
             
             await using var memoryStream = new MemoryStream();
             await modVersionForm.Archive.CopyToAsync(memoryStream);
-            var modVersion = await _modService.CreateModVersion(name, version, modVersionForm.Attributes.Dependencies, memoryStream);
+            var modVersion = await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, memoryStream);
 
             return CreatedAtAction(
                 nameof(GetModVersion),

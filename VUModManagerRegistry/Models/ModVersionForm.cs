@@ -8,6 +8,7 @@ namespace VUModManagerRegistry.Models
     {
         [ModelBinder(BinderType = typeof(JsonModelBinder))]
         public ModVersionDto Attributes { get; set; }
+        public string Tag { get; set; }
         public IFormFile Archive { get; set; }
     }
 }

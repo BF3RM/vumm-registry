@@ -45,36 +45,59 @@ namespace VUModManagerRegistry.Services
             return true;
         }
 
-        public async Task<ModVersionDto> CreateModVersion(string name, string version, Dictionary<string, string> dependencies, Stream stream)
+        public async Task<ModVersionDto> CreateModVersion(ModVersionDto modVersionDto, string tag, Stream stream)
         {
-            if (await ModVersionExists(name, version))
+            if (await ModVersionExists(modVersionDto.Name, modVersionDto.Version))
             {
                 throw new ArgumentException("An entry with the same version already exists.");
             }
             
-            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == name);
+            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == modVersionDto.Name);
             if (mod == null)
             {
                 // If mod does not exist yet, create a new one
                 mod = new Mod
                 {
-                    Name = name
+                    Name = modVersionDto.Name
                 };
                 _context.Mods.Add(mod);
             }
             
+            // Create mod version
             var modVersion = new ModVersion
             {
-                Name = name,
-                Version = version,
-                Dependencies = dependencies,
+                Name = modVersionDto.Name,
+                Version = modVersionDto.Version,
+                Dependencies = modVersionDto.Dependencies,
                 ModId = mod.Id
             };
-
             _context.ModVersions.Add(modVersion);
+            
+            // Default tag to latest
+            if (String.IsNullOrEmpty(tag))
+            {
+                tag = "latest";
+            }
+
+            // Create/update mod tag
+            var modTag = await _context.ModTags.SingleOrDefaultAsync(t => t.ModId == mod.Id && t.Name == tag);
+            if (modTag == null) 
+            {
+                modTag = new ModTag()
+                {
+                    Name = tag,
+                    Version = modVersionDto.Version,
+                    ModId = mod.Id
+                };
+                _context.ModTags.Add(modTag);
+            }
+            else
+            {
+                modTag.Version = modVersionDto.Version;
+            }
             await _context.SaveChangesAsync();
             
-            await _uploadService.StoreModVersionArchive(name, version, stream);
+            await _uploadService.StoreModVersionArchive(modVersionDto.Name, modVersionDto.Version, stream);
             
             return ModDtoHelper.ModVersionToDto(modVersion);
         }

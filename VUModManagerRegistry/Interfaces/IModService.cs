@@ -24,12 +24,11 @@ namespace VUModManagerRegistry.Interfaces
         /// <summary>
         /// Create a new mod version
         /// </summary>
-        /// <param name="name">mod name</param>
-        /// <param name="version">mod version</param>
-        /// <param name="dependencies">mod version dependencies</param>
+        /// <param name="modVersion">mod version</param>
+        /// <param name="tag">mod version tag</param>
         /// <param name="stream">mod version archive stream</param>
         /// <returns></returns>
-        public Task<ModVersionDto> CreateModVersion(string name, string version, Dictionary<string, string> dependencies, Stream stream);
+        public Task<ModVersionDto> CreateModVersion(ModVersionDto modVersion, string tag, Stream stream);
 
         /// <summary>
         /// Check whether a mod version exists
