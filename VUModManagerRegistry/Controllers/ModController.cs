@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Controllers
@@ -11,101 +10,69 @@ namespace VUModManagerRegistry.Controllers
     [Route("/api/mods")]
     public class ModController : ControllerBase
     {
-        private readonly RegistryContext _context;
-        
-        public ModController(RegistryContext context)
+        private readonly IModService _modService;
+        private readonly IModUploadService _uploadService;
+
+        public ModController(IModService modService, IModUploadService uploadService)
         {
-            _context = context;
+            _modService = modService;
+            _uploadService = uploadService;
         }
 
         [HttpGet("{name}")]
         public async Task<ActionResult<ModDto>> GetMod(string name)
         {
-            var mod = await _context.Mods
-                .Include(m => m.Versions)
-                .Include(m => m.Tags)
-                .SingleOrDefaultAsync(m => m.Name == name);
-            
+            var mod = await _modService.GetMod(name);
             if (mod == null)
             {
                 return NotFound();
             }
 
-            return ModToDto(mod);
+            return mod;
         }
         
         [HttpGet("{name}/{version}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string version)
         {
-            var modVersion = await _context.ModVersions
-                .FirstOrDefaultAsync(v => v.Name == name && v.Version == version);
-
+            var modVersion = await _modService.GetModVersion(name, version);
             if (modVersion == null)
             {
                 return NotFound();
             }
 
-            return VersionToDto(modVersion);
+            return modVersion;
+        }
+
+        [HttpGet("{name}/{version}/archive")]
+        public async Task<IActionResult> GetModVersionArchive(string name, string version)
+        {
+            if (!await _modService.ModVersionExists(name, version))
+            {
+                return NotFound();
+            }
+
+            var stream = _uploadService.GetModVersionArchive(name, version);
+            stream.Position = 0;
+            return File(stream, "application/octet-stream", "archive.tar.gz");
         }
         
+        
         [HttpPut("{name}/{version}")]
-        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, ModVersionDto modVersionDto)
+        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, [FromForm]ModVersionForm modVersionForm)
         {
-            if (name != modVersionDto.Name || version != modVersionDto.Version)
+            if (name != modVersionForm.Attributes.Name || version != modVersionForm.Attributes.Version)
             {
                 return BadRequest();
             }
-
-            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == name);
-            if (mod == null)
-            {
-                mod = new Mod
-                {
-                    Name = name,
-                    Description = modVersionDto.Description,
-                    Author = modVersionDto.Author
-                };
-                _context.Mods.Add(mod);
-            }
-
-            var modVersion = new ModVersion
-            {
-                Name = modVersionDto.Name,
-                Description = modVersionDto.Description,
-                Author = modVersionDto.Author,
-                Version = modVersionDto.Version,
-                Dependencies = modVersionDto.Dependencies,
-                ModId = mod.Id
-            };
-
-            _context.ModVersions.Add(modVersion);
-            await _context.SaveChangesAsync();
+            
+            await using var memoryStream = new MemoryStream();
+            await modVersionForm.Archive.CopyToAsync(memoryStream);
+            var modVersion = await _modService.CreateModVersion(name, version, modVersionForm.Attributes.Dependencies, memoryStream);
 
             return CreatedAtAction(
                 nameof(GetModVersion),
                 new { name = modVersion.Name, version = modVersion.Version },
-                VersionToDto(modVersion));
+                modVersion);
         }
-
-        private static ModDto ModToDto(Mod mod) =>
-            new()
-            {
-                Name = mod.Name,
-                Description = mod.Description,
-                Author = mod.Author,
-                Tags = mod.Tags.ToDictionary(t => t.Name, t => t.Version),
-                Versions = mod.Versions
-                    .ToDictionary(v => v.Version, VersionToDto)
-            };
-        
-        private static ModVersionDto VersionToDto(ModVersion modVersion) =>
-            new()
-            {
-                Name = modVersion.Name,
-                Description = modVersion.Description,
-                Author = modVersion.Author,
-                Version = modVersion.Version,
-                Dependencies = modVersion.Dependencies
-            };
     }
 }

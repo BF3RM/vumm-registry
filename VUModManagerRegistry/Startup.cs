@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Services;
 
 namespace VUModManagerRegistry
 {
@@ -28,11 +31,17 @@ namespace VUModManagerRegistry
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<JsonSerializerOptions>(options =>
+            {
+                options.IgnoreNullValues = true;
+                options.PropertyNameCaseInsensitive = true;
+            });
+            
             services.AddDbContext<RegistryContext>(options =>
             {
                 options.UseNpgsql(Configuration.GetConnectionString("RegistryDatabase"));
             });
-            
+
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
@@ -41,6 +50,10 @@ namespace VUModManagerRegistry
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "VUModManagerRegistry", Version = "v1"});
             });
+
+            // Services
+            services.AddScoped<IModService, ModService>();
+            services.AddSingleton<IModUploadService, ModUploadService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,6 +69,12 @@ namespace VUModManagerRegistry
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(x => x
+                .SetIsOriginAllowed(origin => true)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
 
             app.UseAuthorization();
 

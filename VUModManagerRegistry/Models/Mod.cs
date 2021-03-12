@@ -19,6 +19,5 @@ namespace VUModManagerRegistry.Models
         public List<ModVersion> Versions { get; set; }
         
         public List<ModTag> Tags { get; set; }
-        // public Dictionary<string, string> Tags { get; set; }
     }
 }

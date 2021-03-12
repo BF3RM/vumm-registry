@@ -8,6 +8,8 @@ namespace VUModManagerRegistry.Models
         public string Description { get; set; }
         public string Author { get; set; }
         public string Version { get; set; }
+        
+        public string Archive { get; set; }
         public Dictionary<string, string> Dependencies { get; set; }
     }
 }
