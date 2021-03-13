@@ -22,6 +22,9 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("{name}")]
         public async Task<ActionResult<ModDto>> GetMod(string name)
         {
+            // TODO: Solve this with modelbinding...
+            name = name.ToLower();
+            
             var mod = await _modService.GetMod(name);
             if (mod == null)
             {
@@ -34,6 +37,9 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("{name}/{version}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string version)
         {
+            // TODO: Solve this with modelbinding...
+            name = name.ToLower();
+            
             var modVersion = await _modService.GetModVersion(name, version);
             if (modVersion == null)
             {
@@ -46,6 +52,9 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("{name}/{version}/archive")]
         public async Task<IActionResult> GetModVersionArchive(string name, string version)
         {
+            // TODO: Solve this with modelbinding...
+            name = name.ToLower();
+            
             if (!await _modService.ModVersionExists(name, version))
             {
                 return NotFound();
@@ -60,6 +69,10 @@ namespace VUModManagerRegistry.Controllers
         [HttpPut("{name}/{version}")]
         public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, [FromForm]ModVersionForm modVersionForm)
         {
+            // TODO: Solve this with modelbinding...
+            name = name.ToLower();
+            modVersionForm.Attributes.Name = modVersionForm.Attributes.Name.ToLower();
+            
             if (name != modVersionForm.Attributes.Name || version != modVersionForm.Attributes.Version)
             {
                 return BadRequest();

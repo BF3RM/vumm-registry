@@ -51,17 +51,9 @@ namespace VUModManagerRegistry.Services
             {
                 throw new ArgumentException("An entry with the same version already exists.");
             }
-            
-            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == modVersionDto.Name);
-            if (mod == null)
-            {
-                // If mod does not exist yet, create a new one
-                mod = new Mod
-                {
-                    Name = modVersionDto.Name
-                };
-                _context.Mods.Add(mod);
-            }
+
+            // Get or create the mod
+            var mod = await _CreateOrGetMod(modVersionDto.Name);
             
             // Create mod version
             var modVersion = new ModVersion
@@ -71,32 +63,15 @@ namespace VUModManagerRegistry.Services
                 Dependencies = modVersionDto.Dependencies,
                 ModId = mod.Id
             };
-            _context.ModVersions.Add(modVersion);
+            await _context.ModVersions.AddAsync(modVersion);
             
-            // Default tag to latest
-            if (String.IsNullOrEmpty(tag))
-            {
-                tag = "latest";
-            }
-
-            // Create/update mod tag
-            var modTag = await _context.ModTags.SingleOrDefaultAsync(t => t.ModId == mod.Id && t.Name == tag);
-            if (modTag == null) 
-            {
-                modTag = new ModTag()
-                {
-                    Name = tag,
-                    Version = modVersionDto.Version,
-                    ModId = mod.Id
-                };
-                _context.ModTags.Add(modTag);
-            }
-            else
-            {
-                modTag.Version = modVersionDto.Version;
-            }
+            // Create or update the mod tag
+            await _CreateOrUpdateModTag(mod.Id, tag, modVersionDto.Version);
+            
+            // Save changes
             await _context.SaveChangesAsync();
             
+            // Upload the archive
             await _uploadService.StoreModVersionArchive(modVersionDto.Name, modVersionDto.Version, stream);
             
             return ModDtoHelper.ModVersionToDto(modVersion);
@@ -130,7 +105,48 @@ namespace VUModManagerRegistry.Services
 
             return true;
         }
+
+        private async Task<Mod> _CreateOrGetMod(string name)
+        {
+            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == name);
+            if (mod == null)
+            {
+                // If mod does not exist yet, create a new one
+                mod = new Mod
+                {
+                    Name = name
+                };
+                await _context.Mods.AddAsync(mod);
+            }
+
+            return mod;
+        }
         
+        private async Task _CreateOrUpdateModTag(long modId, string tag, string version)
+        {
+            // Default tag to latest
+            if (String.IsNullOrEmpty(tag))
+            {
+                tag = "latest";
+            }
+
+            // Create/update mod tag
+            var modTag = await _context.ModTags.SingleOrDefaultAsync(t => t.ModId == modId && t.Name == tag);
+            if (modTag == null) 
+            {
+                modTag = new ModTag()
+                {
+                    Name = tag,
+                    Version = version,
+                    ModId = modId
+                };
+                await _context.ModTags.AddAsync(modTag);
+            }
+            else
+            {
+                modTag.Version = version;
+            }
+        }
         
     }
 }
