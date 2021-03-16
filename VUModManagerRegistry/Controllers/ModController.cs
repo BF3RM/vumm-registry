@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 
@@ -77,15 +78,24 @@ namespace VUModManagerRegistry.Controllers
             {
                 return BadRequest();
             }
-            
-            await using var memoryStream = new MemoryStream();
-            await modVersionForm.Archive.CopyToAsync(memoryStream);
-            var modVersion = await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, memoryStream);
 
-            return CreatedAtAction(
-                nameof(GetModVersion),
-                new { name = modVersion.Name, version = modVersion.Version },
-                modVersion);
+            try
+            {
+                await using var memoryStream = new MemoryStream();
+                await modVersionForm.Archive.CopyToAsync(memoryStream);
+                var modVersion =
+                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, memoryStream);
+
+                return CreatedAtAction(
+                    nameof(GetModVersion),
+                    new {name = modVersion.Name, version = modVersion.Version},
+                    modVersion);
+            }
+            catch (ModVersionAlreadyExistsException ex)
+            {
+                ModelState.AddModelError(nameof(modVersionForm.Attributes.Version), ex.Message);
+                return Conflict();
+            }
         }
     }
 }

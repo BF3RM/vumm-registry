@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using VUModManagerRegistry.Helpers;
 
 namespace VUModManagerRegistry.Models
 {
@@ -40,9 +41,10 @@ namespace VUModManagerRegistry.Models
                 entity
                     .Property(v => v.Dependencies)
                     .HasConversion(
-                        v => JsonConvert.SerializeObject(v, Formatting.None),
-                        v => JsonConvert.DeserializeObject<Dictionary<string, string>>(v)
-                    );
+                        v => JsonSerializer.Serialize(v, null),
+                        v => JsonSerializer.Deserialize<Dictionary<string, string>>(v, null)
+                    )
+                    .Metadata.SetValueComparer(DictionaryHelpers.StringValueComparer);
 
                 entity
                     .HasIndex(v => new {v.Name, v.Version})

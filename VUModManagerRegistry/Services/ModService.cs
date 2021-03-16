@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Helpers;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
@@ -49,7 +50,7 @@ namespace VUModManagerRegistry.Services
         {
             if (await ModVersionExists(modVersionDto.Name, modVersionDto.Version))
             {
-                throw new ArgumentException("An entry with the same version already exists.");
+                throw new ModVersionAlreadyExistsException(modVersionDto.Name, modVersionDto.Version);
             }
 
             // Get or create the mod
@@ -117,6 +118,7 @@ namespace VUModManagerRegistry.Services
                     Name = name
                 };
                 await _context.Mods.AddAsync(mod);
+                await _context.SaveChangesAsync();
             }
 
             return mod;
