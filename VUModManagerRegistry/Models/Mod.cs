@@ -17,7 +17,5 @@ namespace VUModManagerRegistry.Models
         public string Author { get; set; }
         
         public List<ModVersion> Versions { get; set; }
-        
-        public List<ModTag> Tags { get; set; }
     }
 }

@@ -11,7 +11,10 @@ namespace VUModManagerRegistry.Helpers
                 Name = mod.Name,
                 Description = mod.Description,
                 Author = mod.Author,
-                Tags = mod.Tags.ToDictionary(t => t.Name, t => t.Version),
+                Tags = mod.Versions
+                    .GroupBy(v => v.Tag)
+                    .Select(g => g.Last())
+                    .ToDictionary(v => v.Tag, v => v.Version),
                 Versions = mod.Versions
                     .ToDictionary(v => v.Version, ModVersionToDto)
             };

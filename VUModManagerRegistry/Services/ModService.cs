@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Exceptions;
@@ -25,7 +26,6 @@ namespace VUModManagerRegistry.Services
         {
             var mod = await _context.Mods
                 .Include(m => m.Versions)
-                .Include(m => m.Tags)
                 .AsSingleQuery()
                 .SingleOrDefaultAsync(m => m.Name == name);
 
@@ -62,12 +62,13 @@ namespace VUModManagerRegistry.Services
                 Name = modVersionDto.Name,
                 Version = modVersionDto.Version,
                 Dependencies = modVersionDto.Dependencies,
+                Tag = tag,
                 ModId = mod.Id
             };
             await _context.ModVersions.AddAsync(modVersion);
             
             // Create or update the mod tag
-            await _CreateOrUpdateModTag(mod.Id, tag, modVersionDto.Version);
+            // await _CreateOrUpdateModTag(mod.Id, tag, modVersionDto.Version);
             
             // Save changes
             await _context.SaveChangesAsync();
@@ -103,6 +104,16 @@ namespace VUModManagerRegistry.Services
 
             _context.ModVersions.Remove(modVersion);
             await _context.SaveChangesAsync();
+            
+            // Delete mod if no versions are left
+            var mod = await _context.Mods.Include(m => m.Versions).SingleOrDefaultAsync(m => m.Name == name);
+            if (mod.Versions.Count == 0)
+            {
+                _context.Mods.Remove(mod);
+                await _context.SaveChangesAsync();
+            }
+
+            await _uploadService.DeleteModVersionArchive(name, version);
 
             return true;
         }
@@ -123,32 +134,5 @@ namespace VUModManagerRegistry.Services
 
             return mod;
         }
-        
-        private async Task _CreateOrUpdateModTag(long modId, string tag, string version)
-        {
-            // Default tag to latest
-            if (String.IsNullOrEmpty(tag))
-            {
-                tag = "latest";
-            }
-
-            // Create/update mod tag
-            var modTag = await _context.ModTags.SingleOrDefaultAsync(t => t.ModId == modId && t.Name == tag);
-            if (modTag == null) 
-            {
-                modTag = new ModTag()
-                {
-                    Name = tag,
-                    Version = version,
-                    ModId = modId
-                };
-                await _context.ModTags.AddAsync(modTag);
-            }
-            else
-            {
-                modTag.Version = version;
-            }
-        }
-        
     }
 }

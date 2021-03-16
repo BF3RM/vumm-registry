@@ -97,5 +97,16 @@ namespace VUModManagerRegistry.Controllers
                 return Conflict();
             }
         }
+
+        [HttpDelete("{name}/{version}")]
+        public async Task<IActionResult> DeleteModVersion(string name, string version)
+        {
+            if (!await _modService.DeleteModVersion(name, version))
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
     }
 }
