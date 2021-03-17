@@ -9,6 +9,8 @@ namespace VUModManagerRegistry.Models
     {
         public DbSet<Mod> Mods { get; set; }
         public DbSet<ModVersion> ModVersions { get; set; }
+        
+        public DbSet<AccessToken> AccessTokens { get; set; }
 
         public RegistryContext(DbContextOptions<RegistryContext> options)
             : base(options)
@@ -19,6 +21,9 @@ namespace VUModManagerRegistry.Models
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<AccessToken>()
+                .HasIndex(a => a.Token);
+            
             modelBuilder.Entity<Mod>(entity =>
             {
                 // Has many versions

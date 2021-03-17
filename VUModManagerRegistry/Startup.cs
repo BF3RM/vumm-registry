@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using VUModManagerRegistry.Authentication;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Services;
@@ -46,12 +47,13 @@ namespace VUModManagerRegistry
             {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "VUModManagerRegistry", Version = "v1"});
-            });
+            
+            // Authentication
+            services.AddAuthentication("AccessToken")
+                .AddScheme<TokenAuthenticationOptions, TokenAuthenticationHandler>("AccessToken", null);
 
             // Services
+            services.AddScoped<IAccessTokenService, AccessTokenService>();
             services.AddScoped<IModService, ModService>();
             services.AddSingleton<IModUploadService, ModUploadService>();
         }
@@ -62,13 +64,12 @@ namespace VUModManagerRegistry
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "VUModManagerRegistry v1"));
             }
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseCors(x => x
                 .SetIsOriginAllowed(origin => true)

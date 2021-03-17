@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Interfaces;
@@ -7,6 +8,7 @@ using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("/api/mods")]
     public class ModController : ControllerBase
