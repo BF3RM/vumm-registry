@@ -1,0 +1,7 @@
+﻿# directories
+**/bin/
+**/obj/
+**/out/
+
+# files
+**/*.md

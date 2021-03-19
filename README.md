@@ -15,7 +15,7 @@ Every release of the registry has a Docker image available at Docker Hub (insert
 (insert docker instructions)
 
 ### Building and running from source
-If you wish to build the registry from source, first install [.NET 5.0](https://dotnet.microsoft.com/download/dotnet).
+If you wish to build the registry from source, first install [.NET 5.0](https://dotnet.microsoft.com/download/dotnet). \
 Once that's installed running the registry should be as simple as running the following two commands from the `VUModManagerRegistry` folder:
 ```bash
 dotnet build
@@ -26,7 +26,7 @@ This project can also be opened in Visual Studio or Jetbrains Rider and be run f
 ## API
 We highly recommend using [our own tool](https://github.com/BF3RM/vumm-cli). In case you wonder what is possible with the registy, below is an overview of the current available api endpoints.
 ### Fetch mod metadata
-Fetch all metadata of a mod (description, authors, tags & versions)
+Fetch all metadata of a mod (description, authors, tags & versions)\
 `GET /api/v1/mods/<name>`
 
 | Parameter | Description | Required |
@@ -69,7 +69,7 @@ Example response
 ```
 
 ### Fetch mod version metadata
-Fetch a specific version and get it's dependencies
+Fetch a specific version and get it's dependencies\
 `GET /api/v1/mods/<name>/<version>`
 
 | Parameter | Description | Required |
@@ -92,7 +92,7 @@ Example response
 ```
 
 ### Download mod version archive
-Download mod version archive in a oclet-stream as gzipped tarbal (tar.gz)
+Download mod version archive in a oclet-stream as gzipped tarbal (tar.gz)\
 `GET /api/v1/mods/<name>/<version>/archive`
 
 | Parameter | Description | Required |
@@ -102,7 +102,7 @@ Download mod version archive in a oclet-stream as gzipped tarbal (tar.gz)
 
 
 ### Publish mod version
-Publishing a mod version
+Publishing a mod version\
 `PUT /api/v1/mods/<name>/<version>`
 
 | Parameter | Description | Required |
@@ -114,7 +114,7 @@ Publishing a mod version
 ### Unpublish mod version
 Unpublish a mod version and remove it's archive from the registry.
 If no versions are left of a mod, the mod itself is fully removed from the registry.
-This action is not reversible!
+This action is not reversible!\
 `DELETE /api/v1/mods/<name>/<version>`
 
 | Parameter | Description | Required |
