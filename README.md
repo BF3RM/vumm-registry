@@ -1,5 +1,22 @@
 # VU Mod Manager Registry
-Registry for the Venice Unleashed Mod Manager
+<a href="https://github.com/BF3RM/vumm-registry/actions/workflows/build.yml">
+  <img src="https://img.shields.io/github/workflow/status/BF3RM/vumm-registry/Build" alt="build status">
+</a>
+<a href="https://github.com/BF3RM/vumm-registry/releases">
+  <img src="https://img.shields.io/github/release/BF3RM/vumm-registry.svg" alt="releases">
+</a>
+<a href="https://sonarcloud.io/dashboard?id=BF3RM_vumm-registry">
+  <img src="https://sonarcloud.io/api/project_badges/measure?project=BF3RM_vumm-registry&metric=alert_status" alt="quality gate">
+</a>
+<a href="https://sonarcloud.io/component_measures?id=BF3RM_vumm-registry&metric=Security">
+  <img src="https://sonarcloud.io/api/project_badges/measure?project=BF3RM_vumm-registry&metric=security_rating" alt="security">
+</a>
+<a href="https://sonarcloud.io/component_measures?id=BF3RM_vumm-registry&metric=Maintainability">
+  <img src="https://sonarcloud.io/api/project_badges/measure?project=BF3RM_vumm-registry&metric=sqale_rating" alt="maintainability">
+</a>
+<a href="https://sonarcloud.io/component_measures?id=BF3RM_vumm-registry&metric=Coverage">
+  <img src="https://sonarcloud.io/api/project_badges/measure?project=BF3RM_vumm-registry&metric=coverage" alt="coverage">
+</a>
 
 Venice Unleashed Mod Manager is a tool server owners can use to automatically install mods and their dependencies.
 It also allows developers to easily distribute new versions and don't have to worry about shipping the proper dependencies.\
