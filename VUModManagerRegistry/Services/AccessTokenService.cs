@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Interfaces;
@@ -15,22 +16,33 @@ namespace VUModManagerRegistry.Services
             _context = context;
         }
 
-        public async Task<Guid> Create()
+        public async Task<UserAccessToken> Create(User user, AccessTokenType type = AccessTokenType.ReadOnly)
         {
-            var accessToken = new AccessToken()
+            var accessToken = new UserAccessToken()
             {
-                Token = Guid.NewGuid()
+                UserId = user.Id,
+                Token = Guid.NewGuid(),
+                Type = type
             };
 
             await _context.AccessTokens.AddAsync(accessToken);
             await _context.SaveChangesAsync();
 
-            return accessToken.Token;
+            return accessToken;
         }
 
-        public Task<bool> Verify(Guid accessToken)
+        public async Task<(bool IsValid, User User)> Verify(Guid accessToken)
         {
-            return _context.AccessTokens.AnyAsync(t => t.Token == accessToken);
+            var token = await _context.AccessTokens
+                .Include(t => t.User)
+                .FirstOrDefaultAsync(t => t.Token == accessToken);
+
+            if (token == null)
+            {
+                return (false, null);
+            }
+
+            return (true, token.User);
         }
     }
 }

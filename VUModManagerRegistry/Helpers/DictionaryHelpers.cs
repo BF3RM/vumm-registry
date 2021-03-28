@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace VUModManagerRegistry.Helpers
 {
-    public class DictionaryHelpers
+    public static class DictionaryHelpers
     {
         public static ValueComparer<Dictionary<string, string>> StringValueComparer =>
             new ValueComparer<Dictionary<string, string>>(

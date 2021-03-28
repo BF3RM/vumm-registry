@@ -96,7 +96,7 @@ namespace VUModManagerRegistry.Controllers
             catch (ModVersionAlreadyExistsException ex)
             {
                 ModelState.AddModelError(nameof(modVersionForm.Attributes.Version), ex.Message);
-                return Conflict();
+                return Conflict(ModelState);
             }
         }
 

@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VUModManagerRegistry.Models
 {
+    [Table("ModVersions")]
     public class ModVersion
     {
         [Key]

@@ -3,7 +3,7 @@ using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Helpers
 {
-    public class ModDtoHelper
+    public static class ModDtoHelper
     {
         public static ModDto ModToDto(Mod mod) =>
             new()

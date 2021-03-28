@@ -12,12 +12,12 @@ using VUModManagerRegistry.Interfaces;
 
 namespace VUModManagerRegistry.Authentication
 {
-    public class TokenAuthenticationHandler : AuthenticationHandler<TokenAuthenticationOptions>
+    public class AccessTokenHandler : AuthenticationHandler<AccessTokenOptions>
     {
         private readonly IAccessTokenService _accessTokenService;
         
-        public TokenAuthenticationHandler(
-            IOptionsMonitor<TokenAuthenticationOptions> options,
+        public AccessTokenHandler(
+            IOptionsMonitor<AccessTokenOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
@@ -35,16 +35,18 @@ namespace VUModManagerRegistry.Authentication
             
             if (!Guid.TryParse(authorization, out var accessToken))
                 return AuthenticateResult.Fail("Unauthorized");
-            
-            if (!await _accessTokenService.Verify(accessToken))
+
+            var authRes = await _accessTokenService.Verify(accessToken);
+            if (!authRes.IsValid)
                 return AuthenticateResult.Fail("Unauthorized");
 
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Sid, accessToken.ToString())
+                new(ClaimTypes.Sid, accessToken.ToString()),
+                new(ClaimTypes.Name, authRes.User.Username)
             };
             var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var principal = new GenericPrincipal(identity, null);
+            var principal = new ClaimsPrincipal(identity);
 
             return AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name));
         }
