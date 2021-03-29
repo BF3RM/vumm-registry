@@ -13,7 +13,7 @@ namespace VUModManagerRegistry.Tests.Services
     [TestFixture]
     public class AuthenticationServiceTests : ContextAwareTest
     {
-        private AuthenticationService _service;
+        private IAuthenticationService _service;
 
         [SetUp]
         public async Task Setup()
