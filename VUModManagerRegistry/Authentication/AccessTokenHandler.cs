@@ -8,22 +8,21 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using VUModManagerRegistry.Interfaces;
+using IAuthenticationService = VUModManagerRegistry.Interfaces.IAuthenticationService;
 
 namespace VUModManagerRegistry.Authentication
 {
     public class AccessTokenHandler : AuthenticationHandler<AccessTokenOptions>
     {
-        private readonly IAccessTokenService _accessTokenService;
-        
+        private readonly IAuthenticationService _authenticationService;
+
         public AccessTokenHandler(
             IOptionsMonitor<AccessTokenOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock,
-            IAccessTokenService accessTokenService) : base(options, logger, encoder, clock)
+            ISystemClock clock, IAuthenticationService authenticationService) : base(options, logger, encoder, clock)
         {
-            _accessTokenService = accessTokenService;
+            _authenticationService = authenticationService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -36,7 +35,7 @@ namespace VUModManagerRegistry.Authentication
             if (!Guid.TryParse(authorization, out var accessToken))
                 return AuthenticateResult.Fail("Unauthorized");
 
-            var authRes = await _accessTokenService.Verify(accessToken);
+            var authRes = await _authenticationService.VerifyToken(accessToken);
             if (!authRes.IsValid)
                 return AuthenticateResult.Fail("Unauthorized");
 

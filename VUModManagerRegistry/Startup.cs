@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using VUModManagerRegistry.Authentication;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories;
 using VUModManagerRegistry.Services;
 
 namespace VUModManagerRegistry
@@ -41,15 +42,21 @@ namespace VUModManagerRegistry
             });
 
             // AuthenticationScheme
-            services.AddAuthentication(AccessTokenDefaults.AuthenticationScheme)
+            services
+                .AddAuthentication(AccessTokenDefaults.AuthenticationScheme)
                 .AddScheme<AccessTokenOptions, AccessTokenHandler>(AccessTokenDefaults.AuthenticationScheme, null);
 
-            // Services
-            services.AddScoped<IAccessTokenService, AccessTokenService>();
-            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            // Repositories
+            services
+                .AddScoped<IAccessTokenRepository, AccessTokenRepository>()
+                .AddScoped<IUserRepository, UserRepository>();
             
-            services.AddScoped<IModService, ModService>();
-            services.AddSingleton<IModUploadService, ModUploadService>();
+            // Services
+            services
+                .AddScoped<IAccessTokenService, AccessTokenService>()
+                .AddScoped<IAuthenticationService, AuthenticationService>()
+                .AddScoped<IModService, ModService>()
+                .AddSingleton<IModUploadService, ModUploadService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

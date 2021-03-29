@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace VUModManagerRegistry.Models
 {
     [Table("Users")]
-    public class User
+    public class User : IEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

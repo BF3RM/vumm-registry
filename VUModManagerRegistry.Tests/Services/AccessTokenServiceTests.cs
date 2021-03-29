@@ -1,75 +1,64 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using NUnit.Framework;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories;
 using VUModManagerRegistry.Services;
 
 namespace VUModManagerRegistry.Tests.Services
 {
     [TestFixture]
-    public class AccessTokenServiceTests : ContextAwareTest
+    public class AccessTokenServiceTests
     {
         private IAccessTokenService _service;
-        private User _registeredUser;
+        private Mock<IAccessTokenRepository> _repositoryMock;
 
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
-            _service = new AccessTokenService(Context);
+            _repositoryMock = new Mock<IAccessTokenRepository>();
+            _service = new AccessTokenService(_repositoryMock.Object);
+        }
 
-            _registeredUser = new User()
+        [Test]
+        public async Task Revoke_ShouldRemoveExistingToken()
+        {
+            var accessToken = new UserAccessToken()
             {
-                Username = "test",
-                Password = "hashedpass"
+                Id = 1,
+                UserId = 1,
+                Token = Guid.NewGuid()
             };
-            await Context.Users.AddAsync(_registeredUser);
-            await Context.SaveChangesAsync();
+            _repositoryMock.Setup(r => r.FindByUserIdAndTokenAsync(accessToken.UserId, accessToken.Token))
+                .ReturnsAsync(accessToken);
+
+            _repositoryMock.Setup(r => r.DeleteAsync(accessToken.Id)).ReturnsAsync(true);
+            
+            Assert.IsTrue(await _service.Revoke(accessToken.UserId, accessToken.Token));
         }
 
         [Test]
-        public async Task Create_ShouldDefaultCreateReadonlyToken()
+        public async Task Revoke_ShouldReturnFalseIfUnknown()
         {
-            var token = await _service.Create(_registeredUser);
-            Assert.NotNull(token.Id);
-            Assert.AreEqual(_registeredUser.Id, token.UserId);
-            Assert.AreEqual(AccessTokenType.ReadOnly, token.Type);
-
-            Assert.IsTrue(await Context.AccessTokens.AnyAsync(t => t.Id == token.Id));
+            Assert.IsFalse(await _service.Revoke(1, Guid.NewGuid()));
         }
 
         [Test]
-        public async Task Create_ShouldCreateGivenTokenType()
+        public async Task GetAll_ShouldReturnUsersTokens()
         {
-            var token = await _service.Create(_registeredUser, AccessTokenType.Publish);
-            Assert.AreEqual(AccessTokenType.Publish, token.Type);
-        }
-
-        [Test]
-        public async Task Verify_ShouldFailWhenInvalid()
-        {
-            var result = await _service.Verify(Guid.NewGuid());
-            Assert.IsFalse(result.IsValid);
-            Assert.IsNull(result.User);
-        }
-
-        [Test]
-        public async Task Verify_ShouldSucceedWhenValid()
-        {
-            var token = new UserAccessToken()
+            var tokens = new List<UserAccessToken>()
             {
-                UserId = _registeredUser.Id,
-                Token = Guid.NewGuid(),
-                Type = AccessTokenType.ReadOnly
+                new UserAccessToken(),
+                new UserAccessToken()
             };
-            await Context.AccessTokens.AddAsync(token);
-            await Context.SaveChangesAsync();
-
-            var result = await _service.Verify(token.Token);
-            Assert.IsTrue(result.IsValid);
-            Assert.IsNotNull(result.User);
-            Assert.AreEqual(token.UserId, result.User.Id);
+            _repositoryMock
+                .Setup(r => r.FindAllByUserIdAsync(1))
+                .ReturnsAsync(tokens);
+            
+            Assert.AreEqual(2, (await _service.GetAll(1)).Count);
         }
     }
 }

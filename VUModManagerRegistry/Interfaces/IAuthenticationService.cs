@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 
@@ -18,5 +19,12 @@ namespace VUModManagerRegistry.Interfaces
         /// <param name="credentials">credentials to login with</param>
         /// <returns></returns>
         public Task<(bool IsValid, UserAccessToken Token)> Login(CredentialsDto credentials);
+
+        /// <summary>
+        /// Login using an access token and give back correlating user
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public Task<(bool IsValid, User User)> VerifyToken(Guid token);
     }
 }

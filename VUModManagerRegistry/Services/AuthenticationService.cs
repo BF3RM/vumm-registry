@@ -1,27 +1,27 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories;
 
 namespace VUModManagerRegistry.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly AppDbContext _context;
-        private readonly IAccessTokenService _accessTokenService;
+        private readonly IUserRepository _userRepository;
+        private readonly IAccessTokenRepository _accessTokenRepository;
 
-        public AuthenticationService(AppDbContext context, IAccessTokenService accessTokenService)
+        public AuthenticationService(IUserRepository userRepository, IAccessTokenRepository accessTokenRepository)
         {
-            _context = context;
-            _accessTokenService = accessTokenService;
+            _userRepository = userRepository;
+            _accessTokenRepository = accessTokenRepository;
         }
 
         public async Task<UserAccessToken> Register(CredentialsDto credentials)
         {
-            if (_context.Users.Any(u => u.Username == credentials.Username))
+            if (await _userRepository.ExistsByUsernameAsync(credentials.Username))
             {
                 throw new UserAlreadyExistsException(credentials.Username);
             }
@@ -29,20 +29,17 @@ namespace VUModManagerRegistry.Services
             var user = new User()
             {
                 Username = credentials.Username,
-                Password = await EncryptPassword(credentials.Password),
-                AccessTokens = new List<UserAccessToken>()
+                Password = await EncryptPassword(credentials.Password)
             };
 
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
+            await _userRepository.AddAsync(user);
 
-            return await _accessTokenService.Create(user, credentials.Type);
+            return await CreateAccessToken(user.Id, credentials.Type);
         }
 
         public async Task<(bool IsValid, UserAccessToken Token)> Login(CredentialsDto credentials)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == credentials.Username);
+            var user = await _userRepository.FindByUsernameAsync(credentials.Username);
 
             if (user == null)
             {
@@ -54,16 +51,41 @@ namespace VUModManagerRegistry.Services
                 return (false, null);
             }
 
-            var token = await _accessTokenService.Create(user, credentials.Type);
+            var token = await CreateAccessToken(user.Id, credentials.Type);
             return (true, token);
         }
 
-        private Task<string> EncryptPassword(string password)
+        public async Task<(bool IsValid, User User)> VerifyToken(Guid token)
+        {
+            var accessToken = await _accessTokenRepository.FindByTokenAsync(token);
+            if (accessToken == null)
+            {
+                return (false, null);
+            }
+
+            var user = await _userRepository.FindByIdAsync(accessToken.UserId);
+
+            return (true, user);
+        }
+
+        private async Task<UserAccessToken> CreateAccessToken(long userId, AccessTokenType type)
+        {
+            var accessToken = new UserAccessToken()
+            {
+                Type = type,
+                Token = Guid.NewGuid(),
+                UserId = userId
+            };
+
+            return await _accessTokenRepository.AddAsync(accessToken);
+        }
+        
+        private static Task<string> EncryptPassword(string password)
         {
             return Task.Run(() => BCrypt.Net.BCrypt.HashPassword(password));
         }
 
-        private Task<bool> VerifyPassword(string hash, string password)
+        private static Task<bool> VerifyPassword(string hash, string password)
         {
             return Task.Run(() => BCrypt.Net.BCrypt.Verify(password, hash));
         }

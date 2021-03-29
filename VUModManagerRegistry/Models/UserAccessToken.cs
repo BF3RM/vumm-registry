@@ -11,7 +11,7 @@ namespace VUModManagerRegistry.Models
     }
     
     [Table("UserAccessTokens")]
-    public class UserAccessToken
+    public class UserAccessToken : IEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
