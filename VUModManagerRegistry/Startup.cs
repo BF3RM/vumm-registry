@@ -1,21 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using VUModManagerRegistry.Authentication;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories;
 using VUModManagerRegistry.Services;
 
 namespace VUModManagerRegistry
@@ -38,24 +31,32 @@ namespace VUModManagerRegistry
                 options.PropertyNameCaseInsensitive = true;
             });
             
-            services.AddDbContext<RegistryContext>(options =>
+            services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseNpgsql(Configuration.GetConnectionString("RegistryDatabase"));
             });
-
+            
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
-            
-            // Authentication
-            services.AddAuthentication("AccessToken")
-                .AddScheme<TokenAuthenticationOptions, TokenAuthenticationHandler>("AccessToken", null);
 
+            // AuthenticationScheme
+            services
+                .AddAuthentication(AccessTokenDefaults.AuthenticationScheme)
+                .AddScheme<AccessTokenOptions, AccessTokenHandler>(AccessTokenDefaults.AuthenticationScheme, null);
+
+            // Repositories
+            services
+                .AddScoped<IAccessTokenRepository, AccessTokenRepository>()
+                .AddScoped<IUserRepository, UserRepository>();
+            
             // Services
-            services.AddScoped<IAccessTokenService, AccessTokenService>();
-            services.AddScoped<IModService, ModService>();
-            services.AddSingleton<IModUploadService, ModUploadService>();
+            services
+                .AddScoped<IAccessTokenService, AccessTokenService>()
+                .AddScoped<IAuthenticationService, AuthenticationService>()
+                .AddScoped<IModService, ModService>()
+                .AddSingleton<IModUploadService, ModUploadService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

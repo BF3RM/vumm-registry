@@ -9,9 +9,9 @@ using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Migrations
 {
-    [DbContext(typeof(RegistryContext))]
-    [Migration("20210317232047_AddAccessTokens")]
-    partial class AddAccessTokens
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20210327233011_AddUsersAndAccessTokens")]
+    partial class AddUsersAndAccessTokens
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,23 +20,6 @@ namespace VUModManagerRegistry.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.3")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            modelBuilder.Entity("VUModManagerRegistry.Models.AccessToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<Guid>("Token")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Token");
-
-                    b.ToTable("AccessTokens");
-                });
 
             modelBuilder.Entity("VUModManagerRegistry.Models.Mod", b =>
                 {
@@ -100,6 +83,51 @@ namespace VUModManagerRegistry.Migrations
                     b.ToTable("ModVersions");
                 });
 
+            modelBuilder.Entity("VUModManagerRegistry.Models.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("VUModManagerRegistry.Models.UserAccessToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<Guid>("Token")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAccessTokens");
+                });
+
             modelBuilder.Entity("VUModManagerRegistry.Models.ModVersion", b =>
                 {
                     b.HasOne("VUModManagerRegistry.Models.Mod", null)
@@ -109,9 +137,25 @@ namespace VUModManagerRegistry.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("VUModManagerRegistry.Models.UserAccessToken", b =>
+                {
+                    b.HasOne("VUModManagerRegistry.Models.User", "User")
+                        .WithMany("AccessTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("VUModManagerRegistry.Models.Mod", b =>
                 {
                     b.Navigation("Versions");
+                });
+
+            modelBuilder.Entity("VUModManagerRegistry.Models.User", b =>
+                {
+                    b.Navigation("AccessTokens");
                 });
 #pragma warning restore 612, 618
         }

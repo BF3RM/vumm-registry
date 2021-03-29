@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace VUModManagerRegistry.Models
 {
+    [Table("Mods")]
     [Index(nameof(Name))]
-    public class Mod
+    public class Mod : IEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

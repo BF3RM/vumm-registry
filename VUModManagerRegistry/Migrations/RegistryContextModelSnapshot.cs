@@ -8,40 +8,23 @@ using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Migrations
 {
-    [DbContext(typeof(RegistryContext))]
+    [DbContext(typeof(AppDbContext))]
     partial class RegistryContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.3")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            modelBuilder.Entity("VUModManagerRegistry.Models.AccessToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<Guid>("Token")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Token");
-
-                    b.ToTable("AccessTokens");
-                });
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("VUModManagerRegistry.Models.Mod", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .UseIdentityByDefaultColumn();
 
                     b.Property<string>("Author")
                         .HasColumnType("text");
@@ -64,7 +47,7 @@ namespace VUModManagerRegistry.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .UseIdentityByDefaultColumn();
 
                     b.Property<string>("Author")
                         .HasColumnType("text");
@@ -98,6 +81,54 @@ namespace VUModManagerRegistry.Migrations
                     b.ToTable("ModVersions");
                 });
 
+            modelBuilder.Entity("VUModManagerRegistry.Models.User", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("VUModManagerRegistry.Models.UserAccessToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("Token")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAccessTokens");
+                });
+
             modelBuilder.Entity("VUModManagerRegistry.Models.ModVersion", b =>
                 {
                     b.HasOne("VUModManagerRegistry.Models.Mod", null)
@@ -107,9 +138,25 @@ namespace VUModManagerRegistry.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("VUModManagerRegistry.Models.UserAccessToken", b =>
+                {
+                    b.HasOne("VUModManagerRegistry.Models.User", "User")
+                        .WithMany("AccessTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("VUModManagerRegistry.Models.Mod", b =>
                 {
                     b.Navigation("Versions");
+                });
+
+            modelBuilder.Entity("VUModManagerRegistry.Models.User", b =>
+                {
+                    b.Navigation("AccessTokens");
                 });
 #pragma warning restore 612, 618
         }

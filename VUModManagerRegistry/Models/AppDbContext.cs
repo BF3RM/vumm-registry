@@ -2,17 +2,19 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Helpers;
+using VUModManagerRegistry.Interfaces;
 
 namespace VUModManagerRegistry.Models
 {
-    public class RegistryContext : DbContext
+    public class AppDbContext : DbContext
     {
         public DbSet<Mod> Mods { get; set; }
         public DbSet<ModVersion> ModVersions { get; set; }
         
-        public DbSet<AccessToken> AccessTokens { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserAccessToken> AccessTokens { get; set; }
 
-        public RegistryContext(DbContextOptions<RegistryContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
@@ -21,7 +23,12 @@ namespace VUModManagerRegistry.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<AccessToken>()
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.AccessTokens)
+                .WithOne(t => t.User)
+                .HasForeignKey(t => t.UserId);
+
+            modelBuilder.Entity<UserAccessToken>()
                 .HasIndex(a => a.Token);
             
             modelBuilder.Entity<Mod>(entity =>

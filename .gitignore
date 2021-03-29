@@ -39,6 +39,9 @@ bld/
 *.VisualState.xml
 TestResult.xml
 
+# Coverlet
+coverage.*
+
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
@@ -343,5 +346,7 @@ fabric.properties
 
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
+
+*/archive/
 
 # End of https://www.toptal.com/developers/gitignore/api/rider,aspnetcore

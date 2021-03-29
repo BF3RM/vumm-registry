@@ -5,7 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VUModManagerRegistry.Models
 {
-    public class ModVersion
+    [Table("ModVersions")]
+    public class ModVersion : IEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

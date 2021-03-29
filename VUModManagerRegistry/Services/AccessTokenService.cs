@@ -1,36 +1,35 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories;
 
 namespace VUModManagerRegistry.Services
 {
     public class AccessTokenService : IAccessTokenService
     {
-        private readonly RegistryContext _context;
+        private readonly IAccessTokenRepository _repository;
 
-        public AccessTokenService(RegistryContext context)
+        public AccessTokenService(IAccessTokenRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-        public async Task<Guid> Create()
+        public async Task<bool> Revoke(long userId, Guid token)
         {
-            var accessToken = new AccessToken()
+            var accessToken = await _repository.FindByUserIdAndTokenAsync(userId, token);
+            if (accessToken == null)
             {
-                Token = Guid.NewGuid()
-            };
+                return false;
+            }
 
-            await _context.AccessTokens.AddAsync(accessToken);
-            await _context.SaveChangesAsync();
-
-            return accessToken.Token;
+            return await _repository.DeleteAsync(accessToken.Id);
         }
 
-        public Task<bool> Verify(Guid accessToken)
+        public async Task<List<UserAccessToken>> GetAll(long userId)
         {
-            return _context.AccessTokens.AnyAsync(t => t.Token == accessToken);
+            return await _repository.FindAllByUserIdAsync(userId);
         }
     }
 }
