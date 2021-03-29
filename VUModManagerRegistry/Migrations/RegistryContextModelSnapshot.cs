@@ -8,7 +8,7 @@ using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Migrations
 {
-    [DbContext(typeof(RegistryContext))]
+    [DbContext(typeof(AppDbContext))]
     partial class RegistryContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

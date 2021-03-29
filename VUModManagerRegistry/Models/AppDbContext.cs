@@ -2,10 +2,11 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Helpers;
+using VUModManagerRegistry.Interfaces;
 
 namespace VUModManagerRegistry.Models
 {
-    public class RegistryContext : DbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
         public DbSet<Mod> Mods { get; set; }
         public DbSet<ModVersion> ModVersions { get; set; }
@@ -13,7 +14,7 @@ namespace VUModManagerRegistry.Models
         public DbSet<User> Users { get; set; }
         public DbSet<UserAccessToken> AccessTokens { get; set; }
 
-        public RegistryContext(DbContextOptions<RegistryContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }

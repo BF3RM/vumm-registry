@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Interfaces;
@@ -9,9 +8,9 @@ namespace VUModManagerRegistry.Services
 {
     public class AccessTokenService : IAccessTokenService
     {
-        private readonly RegistryContext _context;
+        private readonly IAppDbContext _context;
 
-        public AccessTokenService(RegistryContext context)
+        public AccessTokenService(IAppDbContext context)
         {
             _context = context;
         }

@@ -10,10 +10,10 @@ namespace VUModManagerRegistry.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly RegistryContext _context;
+        private readonly IAppDbContext _context;
         private readonly IAccessTokenService _accessTokenService;
 
-        public AuthenticationService(RegistryContext context, IAccessTokenService accessTokenService)
+        public AuthenticationService(IAppDbContext context, IAccessTokenService accessTokenService)
         {
             _context = context;
             _accessTokenService = accessTokenService;

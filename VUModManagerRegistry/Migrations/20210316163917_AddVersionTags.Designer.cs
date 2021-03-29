@@ -8,7 +8,7 @@ using VUModManagerRegistry.Models;
 
 namespace VUModManagerRegistry.Migrations
 {
-    [DbContext(typeof(RegistryContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20210316163917_AddVersionTags")]
     partial class AddVersionTags
     {

@@ -30,7 +30,7 @@ namespace VUModManagerRegistry
                 options.PropertyNameCaseInsensitive = true;
             });
             
-            services.AddDbContext<RegistryContext>(options =>
+            services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseNpgsql(Configuration.GetConnectionString("RegistryDatabase"));
             });
