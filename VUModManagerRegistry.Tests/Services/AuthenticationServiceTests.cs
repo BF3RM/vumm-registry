@@ -11,7 +11,7 @@ using VUModManagerRegistry.Services;
 namespace VUModManagerRegistry.Tests.Services
 {
     [TestFixture]
-    public class AuthenticationServiceTest : ContextAwareTest
+    public class AuthenticationServiceTests : ContextAwareTest
     {
         private AuthenticationService _service;
 

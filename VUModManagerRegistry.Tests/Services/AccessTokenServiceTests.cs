@@ -9,7 +9,7 @@ using VUModManagerRegistry.Services;
 namespace VUModManagerRegistry.Tests.Services
 {
     [TestFixture]
-    public class AccessTokenServiceTest : ContextAwareTest
+    public class AccessTokenServiceTests : ContextAwareTest
     {
         private IAccessTokenService _service;
         private User _registeredUser;
