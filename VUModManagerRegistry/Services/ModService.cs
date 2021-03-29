@@ -10,10 +10,10 @@ namespace VUModManagerRegistry.Services
 {
     public class ModService : IModService
     {
-        private readonly IAppDbContext _context;
+        private readonly AppDbContext _context;
         private readonly IModUploadService _uploadService;
 
-        public ModService(IAppDbContext context, IModUploadService uploadService)
+        public ModService(AppDbContext context, IModUploadService uploadService)
         {
             _context = context;
             _uploadService = uploadService;

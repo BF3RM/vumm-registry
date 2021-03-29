@@ -4,13 +4,9 @@ namespace VUModManagerRegistry.Models
 {
     public class UserAccessTokenDto
     {
-        public AccessTokenType Type { get; }
-        public Guid Token { get; }
-
-        public UserAccessTokenDto(UserAccessToken token)
-        {
-            Type = token.Type;
-            Token = token.Token;
-        }
+        public AccessTokenType Type { get; set; }
+        public Guid Token { get; set; }
+        
+        public DateTime CreatedAt { get; set; }
     }
 }

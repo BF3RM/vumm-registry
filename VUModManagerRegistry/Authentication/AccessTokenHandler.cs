@@ -40,13 +40,14 @@ namespace VUModManagerRegistry.Authentication
             if (!authRes.IsValid)
                 return AuthenticateResult.Fail("Unauthorized");
 
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.Sid, accessToken.ToString()),
-                new(ClaimTypes.Name, authRes.User.Username)
-            };
-            var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var principal = new ClaimsPrincipal(identity);
+            // var claims = new List<Claim>
+            // {
+            //     new(ClaimTypes.Sid, accessToken.ToString()),
+            //     new(ClaimTypes.Name, authRes.User.Username)
+            // };
+            // var identity = new ClaimsIdentity(claims, Scheme.Name);
+            var identity = new UserIdentity(authRes.User);
+            var principal = new GenericPrincipal(identity, null);
 
             return AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name));
         }

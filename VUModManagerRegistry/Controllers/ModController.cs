@@ -11,7 +11,7 @@ namespace VUModManagerRegistry.Controllers
     [Authorize]
     [ApiController]
     [Route("/api/mods")]
-    public class ModController : ControllerBase
+    public class ModController : ApiControllerBase
     {
         private readonly IModService _modService;
         private readonly IModUploadService _uploadService;

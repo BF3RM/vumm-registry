@@ -1,21 +1,25 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Extensions;
 
 namespace VUModManagerRegistry.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : ApiControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly IAccessTokenService _accessTokenService;
 
-        public AuthController(IAuthenticationService authenticationService)
+        public AuthController(IAuthenticationService authenticationService, IAccessTokenService accessTokenService)
         {
             _authenticationService = authenticationService;
+            _accessTokenService = accessTokenService;
         }
 
         [HttpPost("register")]
@@ -24,7 +28,7 @@ namespace VUModManagerRegistry.Controllers
             try
             {
                 var token = await _authenticationService.Register(credentials);
-                return Ok(new UserAccessTokenDto(token));
+                return Ok(token.ToDto());
             }
             catch (UserAlreadyExistsException ex)
             {
@@ -42,21 +46,28 @@ namespace VUModManagerRegistry.Controllers
                 return Unauthorized();
             }
 
-            return Ok(new UserAccessTokenDto(authRes.Token));
+            return Ok(authRes.Token.ToDto());
         }
 
-        // [Authorize]
-        // [HttpGet("tokens")]
-        // public Task<IActionResult> GetTokens()
-        // {
-        //     
-        // }
-        //
-        // [Authorize]
-        // [HttpDelete("tokens/{id}")]
-        // public Task<IActionResult> RevokeToken(long id)
-        // {
-        //
-        // }
+        [Authorize]
+        [HttpGet("tokens")]
+        public async Task<IActionResult> GetTokens()
+        {
+            var tokens = await _accessTokenService.GetAll(AuthenticatedUser.Id);
+            return Ok(tokens.ToDtoList());
+        }
+        
+        [Authorize]
+        [HttpDelete("tokens/{accessToken}")]
+        public async Task<IActionResult> RevokeToken(Guid accessToken)
+        {
+            var success = await _accessTokenService.Revoke(AuthenticatedUser.Id, accessToken);
+            if (!success)
+            {
+                return NotFound();
+            }
+            
+            return NoContent();
+        }
     }
 }

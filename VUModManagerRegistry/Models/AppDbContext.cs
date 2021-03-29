@@ -6,7 +6,7 @@ using VUModManagerRegistry.Interfaces;
 
 namespace VUModManagerRegistry.Models
 {
-    public class AppDbContext : DbContext, IAppDbContext
+    public class AppDbContext : DbContext
     {
         public DbSet<Mod> Mods { get; set; }
         public DbSet<ModVersion> ModVersions { get; set; }

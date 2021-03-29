@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Interfaces;
@@ -8,9 +10,9 @@ namespace VUModManagerRegistry.Services
 {
     public class AccessTokenService : IAccessTokenService
     {
-        private readonly IAppDbContext _context;
+        private readonly AppDbContext _context;
 
-        public AccessTokenService(IAppDbContext context)
+        public AccessTokenService(AppDbContext context)
         {
             _context = context;
         }
@@ -42,6 +44,25 @@ namespace VUModManagerRegistry.Services
             }
 
             return (true, token.User);
+        }
+
+        public async Task<bool> Revoke(long userId, Guid token)
+        {
+            var accessToken = await _context.AccessTokens.FirstOrDefaultAsync(t => t.UserId == userId && t.Token == token);
+            if (accessToken == null)
+            {
+                return false;
+            }
+            
+            _context.AccessTokens.Remove(accessToken);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<List<UserAccessToken>> GetAll(long userId)
+        {
+            return await _context.AccessTokens.Where(t => t.UserId == userId).ToListAsync();
         }
     }
 }
