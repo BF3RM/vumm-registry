@@ -21,7 +21,7 @@ namespace VUModManagerRegistry.Models
         
         public List<UserAccessToken> AccessTokens { get; set; }
         
-        public ICollection<Mod> Mods { get; set; }
-        public List<ModUserPermission> ModPermissions { get; set; }
+        public virtual ICollection<Mod> Mods { get; set; }
+        public virtual ICollection<ModUserPermission> ModPermissions { get; set; }
     }
 }

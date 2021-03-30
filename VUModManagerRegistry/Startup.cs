@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -45,9 +46,15 @@ namespace VUModManagerRegistry
             services
                 .AddAuthentication(AccessTokenDefaults.AuthenticationScheme)
                 .AddScheme<AccessTokenOptions, AccessTokenHandler>(AccessTokenDefaults.AuthenticationScheme, null);
+            
+            // Authorization
+            services
+                .AddAuthorization()
+                .AddScoped<IAuthorizationHandler, ModAuthorizationHandler>();
 
             // Repositories
             services
+                .AddScoped<IModRepository, ModRepository>()
                 .AddScoped<IAccessTokenRepository, AccessTokenRepository>()
                 .AddScoped<IUserRepository, UserRepository>();
             

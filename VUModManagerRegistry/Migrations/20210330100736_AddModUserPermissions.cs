@@ -7,7 +7,7 @@ namespace VUModManagerRegistry.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ModUserPermission",
+                name: "ModUserPermissions",
                 columns: table => new
                 {
                     ModId = table.Column<long>(type: "bigint", nullable: false),
@@ -16,15 +16,15 @@ namespace VUModManagerRegistry.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ModUserPermission", x => new { x.ModId, x.UserId });
+                    table.PrimaryKey("PK_ModUserPermissions", x => new { x.ModId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_ModUserPermission_Mods_ModId",
+                        name: "FK_ModUserPermissions_Mods_ModId",
                         column: x => x.ModId,
                         principalTable: "Mods",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ModUserPermission_Users_UserId",
+                        name: "FK_ModUserPermissions_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -32,15 +32,15 @@ namespace VUModManagerRegistry.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ModUserPermission_UserId",
-                table: "ModUserPermission",
+                name: "IX_ModUserPermissions_UserId",
+                table: "ModUserPermissions",
                 column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ModUserPermission");
+                name: "ModUserPermissions");
         }
     }
 }

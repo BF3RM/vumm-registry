@@ -9,6 +9,7 @@ namespace VUModManagerRegistry.Models
         Publish
     }
     
+    [Table("ModUserPermissions")]
     public class ModUserPermission
     {
         // [Key]

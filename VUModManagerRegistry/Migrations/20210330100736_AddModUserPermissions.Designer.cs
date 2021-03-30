@@ -10,7 +10,7 @@ using VUModManagerRegistry.Models;
 namespace VUModManagerRegistry.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210330095647_AddModUserPermissions")]
+    [Migration("20210330100736_AddModUserPermissions")]
     partial class AddModUserPermissions
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -59,7 +59,7 @@ namespace VUModManagerRegistry.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ModUserPermission");
+                    b.ToTable("ModUserPermissions");
                 });
 
             modelBuilder.Entity("VUModManagerRegistry.Models.ModVersion", b =>

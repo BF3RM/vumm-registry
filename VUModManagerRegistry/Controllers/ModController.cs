@@ -5,65 +5,92 @@ using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Extensions;
+using VUModManagerRegistry.Services;
 
 namespace VUModManagerRegistry.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("/api/mods")]
     public class ModController : ApiControllerBase
     {
         private readonly IModService _modService;
         private readonly IModUploadService _uploadService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public ModController(IModService modService, IModUploadService uploadService)
+        public ModController(
+            IModService modService,
+            IModUploadService uploadService,
+            IAuthorizationService authorizationService)
         {
             _modService = modService;
             _uploadService = uploadService;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet("{name}")]
         public async Task<ActionResult<ModDto>> GetMod(string name)
         {
-            // TODO: Solve this with modelbinding...
-            name = name.ToLower();
-            
-            var mod = await _modService.GetMod(name);
+            var mod = await _modService.GetMod(name.ToLower());
             if (mod == null)
             {
                 return NotFound();
             }
 
-            return mod;
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            if (authorizationResult.Succeeded)
+            {
+                return mod.ToDto();
+            }
+
+            return Forbid();
         }
         
         [HttpGet("{name}/{version}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string version)
         {
-            // TODO: Solve this with modelbinding...
-            name = name.ToLower();
-            
-            var modVersion = await _modService.GetModVersion(name, version);
+            var mod = await _modService.GetMod(name.ToLower());
+            if (mod == null)
+            {
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var modVersion = await _modService.GetModVersion(mod.Name, version);
             if (modVersion == null)
             {
                 return NotFound();
             }
 
-            return modVersion;
+            return modVersion.ToDto();
         }
 
         [HttpGet("{name}/{version}/archive")]
         public async Task<IActionResult> GetModVersionArchive(string name, string version)
         {
-            // TODO: Solve this with modelbinding...
-            name = name.ToLower();
-            
-            if (!await _modService.ModVersionExists(name, version))
+            var mod = await _modService.GetMod(name.ToLower());
+            if (mod == null)
             {
                 return NotFound();
             }
 
-            var stream = _uploadService.GetModVersionArchive(name, version);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
+            if (!await _modService.ModVersionExists(mod.Name, version))
+            {
+                return NotFound();
+            }
+
+            var stream = _uploadService.GetModVersionArchive(mod.Name, version);
             stream.Position = 0;
             return File(stream, "application/octet-stream", "archive.tar.gz");
         }
@@ -72,13 +99,23 @@ namespace VUModManagerRegistry.Controllers
         [HttpPut("{name}/{version}")]
         public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, [FromForm]ModVersionForm modVersionForm)
         {
-            // TODO: Solve this with modelbinding...
             name = name.ToLower();
             modVersionForm.Attributes.Name = modVersionForm.Attributes.Name.ToLower();
             
             if (name != modVersionForm.Attributes.Name || version != modVersionForm.Attributes.Version)
             {
                 return BadRequest();
+            }
+
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Forbid();
+                }
             }
 
             try
@@ -91,7 +128,7 @@ namespace VUModManagerRegistry.Controllers
                 return CreatedAtAction(
                     nameof(GetModVersion),
                     new {name = modVersion.Name, version = modVersion.Version},
-                    modVersion);
+                    modVersion.ToDto());
             }
             catch (ModVersionAlreadyExistsException ex)
             {

@@ -11,6 +11,13 @@ namespace VUModManagerRegistry.Repositories
         {
         }
 
+        public async Task<User> FindByIdWithPermissionsAsync(long id)
+        {
+            return await Set
+                .Include(u => u.ModPermissions)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
         public async Task<User> FindByUsernameAsync(string username)
         {
             return await Set.FirstOrDefaultAsync(u => u.Username == username);

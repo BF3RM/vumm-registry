@@ -19,14 +19,14 @@ namespace VUModManagerRegistry.Services
             _uploadService = uploadService;
         }
 
-        public async Task<ModDto> GetMod(string name)
+        public async Task<Mod> GetMod(string name)
         {
             var mod = await _context.Mods
                 .Include(m => m.Versions)
                 .AsSingleQuery()
                 .SingleOrDefaultAsync(m => m.Name == name);
 
-            return mod == null ? null : ModDtoHelper.ModToDto(mod);
+            return mod;
         }
 
         public async Task<bool> DeleteMod(string name)
@@ -43,7 +43,7 @@ namespace VUModManagerRegistry.Services
             return true;
         }
 
-        public async Task<ModVersionDto> CreateModVersion(ModVersionDto modVersionDto, string tag, Stream stream)
+        public async Task<ModVersion> CreateModVersion(ModVersionDto modVersionDto, string tag, Stream stream)
         {
             if (await ModVersionExists(modVersionDto.Name, modVersionDto.Version))
             {
@@ -63,17 +63,14 @@ namespace VUModManagerRegistry.Services
                 ModId = mod.Id
             };
             await _context.ModVersions.AddAsync(modVersion);
-            
-            // Create or update the mod tag
-            // await _CreateOrUpdateModTag(mod.Id, tag, modVersionDto.Version);
-            
+
             // Save changes
             await _context.SaveChangesAsync();
             
             // Upload the archive
             await _uploadService.StoreModVersionArchive(modVersionDto.Name, modVersionDto.Version, stream);
-            
-            return ModDtoHelper.ModVersionToDto(modVersion);
+
+            return modVersion;
         }
 
         public Task<bool> ModVersionExists(string name, string version)
@@ -81,12 +78,12 @@ namespace VUModManagerRegistry.Services
             return _context.ModVersions.AnyAsync(m => m.Name == name && m.Version == version);
         }
 
-        public async Task<ModVersionDto> GetModVersion(string name, string version)
+        public async Task<ModVersion> GetModVersion(string name, string version)
         {
             var modVersion = await _context.ModVersions
                 .SingleOrDefaultAsync(m => m.Name == name && m.Version == version);
 
-            return modVersion == null ? null : ModDtoHelper.ModVersionToDto(modVersion);
+            return modVersion;
         }
 
         public async Task<bool> DeleteModVersion(string name, string version)
