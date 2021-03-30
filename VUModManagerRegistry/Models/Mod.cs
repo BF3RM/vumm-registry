@@ -18,5 +18,8 @@ namespace VUModManagerRegistry.Models
         public string Author { get; set; }
         
         public List<ModVersion> Versions { get; set; }
+        
+        public ICollection<User> Users { get; set; }
+        public List<ModUserPermission> UserPermissions { get; set; }
     }
 }

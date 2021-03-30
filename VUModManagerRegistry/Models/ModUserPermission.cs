@@ -1,0 +1,27 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace VUModManagerRegistry.Models
+{
+    public enum ModPermission
+    {
+        Readonly,
+        Publish
+    }
+    
+    public class ModUserPermission
+    {
+        // [Key]
+        // [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        // public long Id { get; set; }
+        
+        public long ModId { get; set; }
+        public Mod Mod { get; set; }
+        
+        public long UserId { get; set; }
+        public User User { get; set; }
+        
+        [Required]
+        public ModPermission Permission { get; set; }
+    }
+}
