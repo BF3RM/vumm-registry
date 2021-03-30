@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 
-namespace VUModManagerRegistry.Interfaces
+namespace VUModManagerRegistry.Services.Contracts
 {
     public interface IModService
     {
@@ -53,5 +52,14 @@ namespace VUModManagerRegistry.Interfaces
         /// <param name="version">mod version</param>
         /// <returns></returns>
         public Task<bool> DeleteModVersion(string name, string version);
+
+        /// <summary>
+        /// Checks whether user has any of the given permissions
+        /// </summary>
+        /// <param name="modId">the mod id</param>
+        /// <param name="userId">the user id</param>
+        /// <param name="permissions">permissions to check</param>
+        /// <returns></returns>
+        public Task<bool> HasAnyPermissions(long modId, long userId, params ModPermission[] permissions);
     }
 }

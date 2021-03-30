@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Helpers;
-using VUModManagerRegistry.Interfaces;
 
 namespace VUModManagerRegistry.Models
 {

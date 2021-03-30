@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Tests.Services
 {

@@ -2,16 +2,17 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Extensions;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AuthController : ApiControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
         private readonly IAccessTokenService _accessTokenService;
@@ -53,7 +54,7 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("tokens")]
         public async Task<IActionResult> GetTokens()
         {
-            var tokens = await _accessTokenService.GetAll(AuthenticatedUser.Id);
+            var tokens = await _accessTokenService.GetAll(User.AuthenticatedUser().Id);
             return Ok(tokens.ToDtoList());
         }
         
@@ -61,7 +62,7 @@ namespace VUModManagerRegistry.Controllers
         [HttpDelete("tokens/{accessToken}")]
         public async Task<IActionResult> RevokeToken(Guid accessToken)
         {
-            var success = await _accessTokenService.Revoke(AuthenticatedUser.Id, accessToken);
+            var success = await _accessTokenService.Revoke(User.AuthenticatedUser().Id, accessToken);
             if (!success)
             {
                 return NotFound();

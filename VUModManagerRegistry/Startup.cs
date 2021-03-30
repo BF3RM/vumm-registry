@@ -7,10 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VUModManagerRegistry.Authentication;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry
 {

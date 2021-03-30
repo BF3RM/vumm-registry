@@ -1,22 +1,25 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Helpers;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories.Contracts;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
     public class ModService : IModService
     {
         private readonly AppDbContext _context;
+        private readonly IModRepository _repository;
         private readonly IModUploadService _uploadService;
 
-        public ModService(AppDbContext context, IModUploadService uploadService)
+        public ModService(AppDbContext context, IModUploadService uploadService, IModRepository repository)
         {
             _context = context;
             _uploadService = uploadService;
+            _repository = repository;
         }
 
         public async Task<Mod> GetMod(string name)
@@ -110,6 +113,20 @@ namespace VUModManagerRegistry.Services
             await _uploadService.DeleteModVersionArchive(name, version);
 
             return true;
+        }
+
+        public async Task<bool> HasAnyPermissions(long modId, long userId, params ModPermission[] permissions)
+        {
+            var userPermissions = await _repository.FindPermissionsByIdAndUserId(modId, userId);
+            if (userPermissions == null)
+            {
+                return false;
+            }
+
+            return userPermissions
+                .Select(p => p.Permission)
+                .Intersect(permissions)
+                .Any();
         }
 
         private async Task<Mod> _CreateOrGetMod(string name)

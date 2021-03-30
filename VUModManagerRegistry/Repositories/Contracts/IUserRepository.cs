@@ -1,12 +1,10 @@
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 
-namespace VUModManagerRegistry.Repositories
+namespace VUModManagerRegistry.Repositories.Contracts
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<User> FindByIdWithPermissionsAsync(long id);
-        
         Task<User> FindByUsernameAsync(string username);
 
         Task<bool> ExistsByUsernameAsync(string username);

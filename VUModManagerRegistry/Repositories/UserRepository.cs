@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories.Contracts;
 
 namespace VUModManagerRegistry.Repositories
 {
@@ -9,13 +10,6 @@ namespace VUModManagerRegistry.Repositories
     {
         public UserRepository(AppDbContext context) : base(context)
         {
-        }
-
-        public async Task<User> FindByIdWithPermissionsAsync(long id)
-        {
-            return await Set
-                .Include(u => u.ModPermissions)
-                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<User> FindByUsernameAsync(string username)

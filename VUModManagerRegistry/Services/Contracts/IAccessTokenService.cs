@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 
-namespace VUModManagerRegistry.Interfaces
+namespace VUModManagerRegistry.Services.Contracts
 {
     public interface IAccessTokenService
     {

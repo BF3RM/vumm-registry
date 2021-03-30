@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Repositories.Contracts;
 
 namespace VUModManagerRegistry.Tests.Repositories
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 
-namespace VUModManagerRegistry.Repositories
+namespace VUModManagerRegistry.Repositories.Contracts
 {
     public interface IAccessTokenRepository : IRepository<UserAccessToken>
     {

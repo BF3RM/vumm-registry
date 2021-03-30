@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using VUModManagerRegistry.Interfaces;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {

@@ -3,16 +3,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Extensions;
 using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Controllers
 {
     [ApiController]
     [Route("/api/mods")]
-    public class ModController : ApiControllerBase
+    public class ModController : ControllerBase
     {
         private readonly IModService _modService;
         private readonly IModUploadService _uploadService;

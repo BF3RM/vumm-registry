@@ -1,23 +1,21 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using VUModManagerRegistry.Authentication;
+using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
     public class ModAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Mod>
     {
-        private readonly IModRepository _modRepository;
+        private readonly IModService _modService;
 
-        public ModAuthorizationHandler(IModRepository modRepository)
+        public ModAuthorizationHandler(IModService modService)
         {
-            _modRepository = modRepository;
+            _modService = modService;
         }
 
         protected override async Task HandleRequirementAsync(
@@ -31,7 +29,7 @@ namespace VUModManagerRegistry.Services
                 {
                     context.Succeed(requirement);
                 }
-                else if (await HasPrincipalPermissions(context.User, resource.Id, 
+                else if (await HasPrincipalPermissions(context.User.AuthenticatedUser(), resource.Id, 
                     ModPermission.Readonly, ModPermission.Publish))
                 {
                     context.Succeed(requirement);
@@ -43,7 +41,7 @@ namespace VUModManagerRegistry.Services
             // Publish permission, check if user has that permission
             if (requirement.Name == ModOperations.Publish.Name)
             {
-                if (await HasPrincipalPermissions(context.User, resource.Id, 
+                if (await HasPrincipalPermissions(context.User.AuthenticatedUser(), resource.Id, 
                     ModPermission.Readonly))
                 {
                     context.Succeed(requirement);
@@ -51,32 +49,15 @@ namespace VUModManagerRegistry.Services
             }
         }
 
-        private async Task<bool> HasPrincipalPermissions(ClaimsPrincipal principal, long modId,
+        private async Task<bool> HasPrincipalPermissions(UserIdentity identity, long modId,
             params ModPermission[] permissions)
         {
-            if (principal?.Identity?.IsAuthenticated == false)
+            if (identity == null)
             {
                 return false;
             }
 
-            var userId = ((UserIdentity) principal.Identity).Id;
-
-            return await HasPermissions(modId, userId, permissions);
-        }
-
-        private async Task<bool> HasPermissions(long modId, long userId, params ModPermission[] permissions)
-        {
-            var userPermissions = await _modRepository.FindPermissionsByIdAndUserId(modId, userId);
-
-            if (userPermissions == null)
-            {
-                return false;
-            }
-
-            return userPermissions
-                .Select(p => p.Permission)
-                .Intersect(permissions)
-                .Any();
+            return await _modService.HasAnyPermissions(modId, identity.Id, permissions);
         }
     }
 
