@@ -48,7 +48,7 @@ namespace VUModManagerRegistry.Services
 
         public Task<bool> RevokePermissions(long modId, long userId)
         {
-            throw new System.NotImplementedException();
+            return _repository.DeleteByModAndUserIdAsync(modId, userId);
         }
     }
 }

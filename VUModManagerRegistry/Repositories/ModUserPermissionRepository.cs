@@ -35,9 +35,18 @@ namespace VUModManagerRegistry.Repositories
             return permission;
         }
 
-        public Task<ModUserPermission> DeleteByModAndUserIdAsync(long modId, long userId)
+        public async Task<bool> DeleteByModAndUserIdAsync(long modId, long userId)
         {
-            throw new System.NotImplementedException();
+            var permission = await FindByModAndUserIdAsync(modId, userId);
+            if (permission == null)
+            {
+                return false;
+            }
+
+            _context.Set<ModUserPermission>().Remove(permission);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

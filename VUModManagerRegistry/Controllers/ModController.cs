@@ -12,7 +12,8 @@ using VUModManagerRegistry.Services.Contracts;
 namespace VUModManagerRegistry.Controllers
 {
     [ApiController]
-    [Route("/api/mods")]
+    [ApiVersion("1")]
+    [Route("/api/v{version:apiVersion}/mods")]
     public class ModController : ControllerBase
     {
         private readonly IModService _modService;
@@ -46,9 +47,9 @@ namespace VUModManagerRegistry.Controllers
 
             return Forbid();
         }
-        
-        [HttpGet("{name}/{version}")]
-        public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string version)
+
+        [HttpGet("{name}/{modVersion}")]
+        public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string modVersion)
         {
             var mod = await _modService.GetMod(name.ToLower());
             if (mod == null)
@@ -62,17 +63,17 @@ namespace VUModManagerRegistry.Controllers
                 return Forbid();
             }
 
-            var modVersion = await _modService.GetModVersion(mod.Name, version);
-            if (modVersion == null)
+            var foundVersion = await _modService.GetModVersion(mod.Name, modVersion);
+            if (foundVersion == null)
             {
                 return NotFound();
             }
 
-            return modVersion.ToDto();
+            return foundVersion.ToDto();
         }
 
-        [HttpGet("{name}/{version}/archive")]
-        public async Task<IActionResult> GetModVersionArchive(string name, string version)
+        [HttpGet("{name}/{modVersion}/archive")]
+        public async Task<IActionResult> GetModVersionArchive(string name, string modVersion)
         {
             var mod = await _modService.GetMod(name.ToLower());
             if (mod == null)
@@ -86,25 +87,25 @@ namespace VUModManagerRegistry.Controllers
                 return Forbid();
             }
             
-            if (!await _modService.ModVersionExists(mod.Name, version))
+            if (!await _modService.ModVersionExists(mod.Name, modVersion))
             {
                 return NotFound();
             }
 
-            var stream = _uploadService.GetModVersionArchive(mod.Name, version);
+            var stream = _uploadService.GetModVersionArchive(mod.Name, modVersion);
             stream.Position = 0;
             return File(stream, "application/octet-stream", "archive.tar.gz");
         }
         
         
-        [HttpPut("{name}/{version}")]
+        [HttpPut("{name}/{modVersion}")]
         [Authorize(Policy = "CanPublish")]
-        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, [FromForm]ModVersionForm modVersionForm)
+        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, [FromForm]ModVersionForm modVersionForm)
         {
             name = name.ToLower();
             modVersionForm.Attributes.Name = modVersionForm.Attributes.Name.ToLower();
             
-            if (name != modVersionForm.Attributes.Name || version != modVersionForm.Attributes.Version)
+            if (name != modVersionForm.Attributes.Name || modVersion != modVersionForm.Attributes.Version)
             {
                 return BadRequest();
             }
@@ -124,13 +125,13 @@ namespace VUModManagerRegistry.Controllers
             {
                 await using var memoryStream = new MemoryStream();
                 await modVersionForm.Archive.CopyToAsync(memoryStream);
-                var modVersion =
+                var createdVersion =
                     await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, User.Id(), memoryStream);
 
                 return CreatedAtAction(
                     nameof(GetModVersion),
-                    new {name = modVersion.Name, version = modVersion.Version},
-                    modVersion.ToDto());
+                    new {name = createdVersion.Name, version = createdVersion.Version},
+                    createdVersion.ToDto());
             }
             catch (ModVersionAlreadyExistsException ex)
             {
@@ -139,8 +140,8 @@ namespace VUModManagerRegistry.Controllers
             }
         }
 
-        [HttpDelete("{name}/{version}")]
-        public async Task<IActionResult> DeleteModVersion(string name, string version)
+        [HttpDelete("{name}/{modVersion}")]
+        public async Task<IActionResult> DeleteModVersion(string name, string modVersion)
         {
             // Check permissions
             var mod = await _modService.GetMod(name);
@@ -153,7 +154,7 @@ namespace VUModManagerRegistry.Controllers
                 }
             }
             
-            if (!await _modService.DeleteModVersion(name, version))
+            if (!await _modService.DeleteModVersion(name, modVersion))
             {
                 return NotFound();
             }

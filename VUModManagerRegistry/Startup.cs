@@ -42,6 +42,10 @@ namespace VUModManagerRegistry
             {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
+            services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+            });
 
             // AuthenticationScheme
             services

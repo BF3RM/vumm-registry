@@ -10,8 +10,9 @@ using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Controllers
 {
-    [Route("api/auth")]
     [ApiController]
+    [ApiVersion("1")]
+    [Route("api/v{version:apiVersion}/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;

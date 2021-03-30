@@ -115,9 +115,10 @@ namespace VUModManagerRegistry.Tests.Services
                 .ReturnsAsync(user);
 
 
-            var (isValid, foundUser) = await _service.VerifyToken(accessToken.Token);
+            var (isValid, foundUser, tokenType) = await _service.VerifyToken(accessToken.Token);
             Assert.IsTrue(isValid);
             Assert.AreEqual(user, foundUser);
+            Assert.AreEqual(tokenType, AccessTokenType.ReadOnly);
         }
     }
 }

@@ -8,6 +8,6 @@ namespace VUModManagerRegistry.Repositories.Contracts
         Task<ModUserPermission> FindByModAndUserIdAsync(long modId, long userId);
         Task<ModUserPermission> AddAsync(ModUserPermission permission);
         Task<ModUserPermission> UpdateAsync(ModUserPermission permission);
-        Task<ModUserPermission> DeleteByModAndUserIdAsync(long modId, long userId);
+        Task<bool> DeleteByModAndUserIdAsync(long modId, long userId);
     }
 }
