@@ -56,17 +56,17 @@ namespace VUModManagerRegistry.Services
             return (true, token);
         }
 
-        public async Task<(bool IsValid, User User)> VerifyToken(Guid token)
+        public async Task<(bool IsValid, User User, AccessTokenType TokenType)> VerifyToken(Guid token)
         {
             var accessToken = await _accessTokenRepository.FindByTokenAsync(token);
             if (accessToken == null)
             {
-                return (false, null);
+                return (false, null, AccessTokenType.ReadOnly);
             }
 
             var user = await _userRepository.FindByIdAsync(accessToken.UserId);
 
-            return (true, user);
+            return (true, user, accessToken.Type);
         }
 
         private async Task<UserAccessToken> CreateAccessToken(long userId, AccessTokenType type)

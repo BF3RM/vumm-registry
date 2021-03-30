@@ -25,9 +25,10 @@ namespace VUModManagerRegistry.Services.Contracts
         /// </summary>
         /// <param name="modVersion">mod version</param>
         /// <param name="tag">mod version tag</param>
+        /// <param name="userId">user id</param>
         /// <param name="stream">mod version archive stream</param>
         /// <returns></returns>
-        public Task<ModVersion> CreateModVersion(ModVersionDto modVersion, string tag, Stream stream);
+        public Task<ModVersion> CreateModVersion(ModVersionDto modVersion, string tag, long userId, Stream stream);
 
         /// <summary>
         /// Check whether a mod version exists
@@ -52,14 +53,5 @@ namespace VUModManagerRegistry.Services.Contracts
         /// <param name="version">mod version</param>
         /// <returns></returns>
         public Task<bool> DeleteModVersion(string name, string version);
-
-        /// <summary>
-        /// Checks whether user has any of the given permissions
-        /// </summary>
-        /// <param name="modId">the mod id</param>
-        /// <param name="userId">the user id</param>
-        /// <param name="permissions">permissions to check</param>
-        /// <returns></returns>
-        public Task<bool> HasAnyPermissions(long modId, long userId, params ModPermission[] permissions);
     }
 }

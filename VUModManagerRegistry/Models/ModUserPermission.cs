@@ -12,10 +12,6 @@ namespace VUModManagerRegistry.Models
     [Table("ModUserPermissions")]
     public class ModUserPermission
     {
-        // [Key]
-        // [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        // public long Id { get; set; }
-        
         public long ModId { get; set; }
         public Mod Mod { get; set; }
         

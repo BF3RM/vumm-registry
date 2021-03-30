@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories;
 using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services.Contracts;
 
@@ -25,7 +24,7 @@ namespace VUModManagerRegistry.Services
                 return false;
             }
 
-            return await _repository.DeleteAsync(accessToken.Id);
+            return await _repository.DeleteByIdAsync(accessToken.Id);
         }
 
         public async Task<List<UserAccessToken>> GetAll(long userId)

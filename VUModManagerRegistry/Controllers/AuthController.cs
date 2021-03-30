@@ -54,7 +54,7 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("tokens")]
         public async Task<IActionResult> GetTokens()
         {
-            var tokens = await _accessTokenService.GetAll(User.AuthenticatedUser().Id);
+            var tokens = await _accessTokenService.GetAll(User.Id());
             return Ok(tokens.ToDtoList());
         }
         
@@ -62,7 +62,7 @@ namespace VUModManagerRegistry.Controllers
         [HttpDelete("tokens/{accessToken}")]
         public async Task<IActionResult> RevokeToken(Guid accessToken)
         {
-            var success = await _accessTokenService.Revoke(User.AuthenticatedUser().Id, accessToken);
+            var success = await _accessTokenService.Revoke(User.Id(), accessToken);
             if (!success)
             {
                 return NotFound();

@@ -50,12 +50,16 @@ namespace VUModManagerRegistry
             
             // Authorization
             services
-                .AddAuthorization()
+                .AddAuthorization(options =>
+                    options.AddPolicy("CanPublish", policy =>
+                        policy.RequireClaim("TokenType", AccessTokenType.Publish.ToString())))
                 .AddScoped<IAuthorizationHandler, ModAuthorizationHandler>();
 
             // Repositories
             services
                 .AddScoped<IModRepository, ModRepository>()
+                .AddScoped<IModVersionRepository, ModVersionRepository>()
+                .AddScoped<IModUserPermissionRepository, ModUserPermissionRepository>()
                 .AddScoped<IAccessTokenRepository, AccessTokenRepository>()
                 .AddScoped<IUserRepository, UserRepository>();
             
@@ -63,6 +67,7 @@ namespace VUModManagerRegistry
             services
                 .AddScoped<IAccessTokenService, AccessTokenService>()
                 .AddScoped<IAuthenticationService, AuthenticationService>()
+                .AddScoped<IModAuthorizationService, ModAuthorizationService>()
                 .AddScoped<IModService, ModService>()
                 .AddSingleton<IModUploadService, ModUploadService>();
         }

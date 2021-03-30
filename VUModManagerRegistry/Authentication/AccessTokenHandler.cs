@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -36,9 +37,15 @@ namespace VUModManagerRegistry.Authentication
             var authRes = await _authenticationService.VerifyToken(accessToken);
             if (!authRes.IsValid)
                 return AuthenticateResult.Fail("Unauthorized");
-            
-            var identity = new UserIdentity(authRes.User);
-            var principal = new GenericPrincipal(identity, null);
+
+            var claims = new Claim[]
+            {
+                new("Id", authRes.User.Id.ToString()),
+                new(ClaimTypes.Name, authRes.User.Username),
+                new("TokenType", authRes.TokenType.ToString())
+            };
+            var identity = new ClaimsIdentity(claims);
+            var principal = new ClaimsPrincipal(identity);
 
             return AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name));
         }

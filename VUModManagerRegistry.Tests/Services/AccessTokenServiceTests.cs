@@ -36,7 +36,7 @@ namespace VUModManagerRegistry.Tests.Services
             _repositoryMock.Setup(r => r.FindByUserIdAndTokenAsync(accessToken.UserId, accessToken.Token))
                 .ReturnsAsync(accessToken);
 
-            _repositoryMock.Setup(r => r.DeleteAsync(accessToken.Id)).ReturnsAsync(true);
+            _repositoryMock.Setup(r => r.DeleteByIdAsync(accessToken.Id)).ReturnsAsync(true);
             
             Assert.IsTrue(await _service.Revoke(accessToken.UserId, accessToken.Token));
         }

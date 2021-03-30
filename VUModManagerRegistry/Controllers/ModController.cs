@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Extensions;
@@ -97,6 +98,7 @@ namespace VUModManagerRegistry.Controllers
         
         
         [HttpPut("{name}/{version}")]
+        [Authorize(Policy = "CanPublish")]
         public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, [FromForm]ModVersionForm modVersionForm)
         {
             name = name.ToLower();
@@ -123,7 +125,7 @@ namespace VUModManagerRegistry.Controllers
                 await using var memoryStream = new MemoryStream();
                 await modVersionForm.Archive.CopyToAsync(memoryStream);
                 var modVersion =
-                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, memoryStream);
+                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, User.Id(), memoryStream);
 
                 return CreatedAtAction(
                     nameof(GetModVersion),
@@ -140,6 +142,17 @@ namespace VUModManagerRegistry.Controllers
         [HttpDelete("{name}/{version}")]
         public async Task<IActionResult> DeleteModVersion(string name, string version)
         {
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Forbid();
+                }
+            }
+            
             if (!await _modService.DeleteModVersion(name, version))
             {
                 return NotFound();

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 
 namespace VUModManagerRegistry.Authentication.Extensions
@@ -5,17 +6,19 @@ namespace VUModManagerRegistry.Authentication.Extensions
     public static class ClaimsPrincipalExtensions
     {
         /// <summary>
-        /// Converts IIdentity to UserIdentity
+        /// Returns id of principal
         /// </summary>
         /// <param name="principal"></param>
         /// <returns></returns>
-        public static UserIdentity AuthenticatedUser(this ClaimsPrincipal principal)
+        public static long Id(this ClaimsPrincipal principal)
         {
-            if (principal.Identity != null && principal.Identity.IsAuthenticated == false)
+            var id = principal.Claims.FirstOrDefault(c => c.Type == "Id");
+            if (id == null)
             {
-                return null;
+                return -1;
             }
-            return principal.Identity as UserIdentity;
+
+            return long.Parse(id.Value);
         }
     }
 }

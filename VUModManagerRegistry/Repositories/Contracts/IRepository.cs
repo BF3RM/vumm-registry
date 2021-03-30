@@ -10,6 +10,6 @@ namespace VUModManagerRegistry.Repositories.Contracts
         Task<T> FindByIdAsync(long id);
         Task<T> AddAsync(T entity);
         Task<T> UpdateAsync(T entity);
-        Task<bool> DeleteAsync(long id);
+        Task<bool> DeleteByIdAsync(long id);
     }
 }

@@ -13,7 +13,33 @@ namespace VUModManagerRegistry.Repositories
         {
         }
 
-        public async Task<ICollection<ModUserPermission>> FindPermissionsByIdAndUserId(long modId, long userId)
+        public Task<Mod> FindByNameAsync(string name)
+        {
+            return Set.FirstOrDefaultAsync(m => m.Name == name);
+        }
+
+        public Task<Mod> FindByNameWithVersionsAsync(string name)
+        {
+            return Set
+                .Include(m => m.Versions)
+                .FirstOrDefaultAsync(m => m.Name == name);
+        }
+
+        public async Task<bool> DeleteByNameAsync(string name)
+        {
+            var mod = await FindByNameAsync(null);
+            if (mod == null)
+            {
+                return false;
+            }
+
+            Set.Remove(mod);
+            await Context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<ICollection<ModUserPermission>> FindPermissionsByIdAndUserIdAsync(long modId, long userId)
         {
             var mod = await Set
                 .Include(m => m.UserPermissions

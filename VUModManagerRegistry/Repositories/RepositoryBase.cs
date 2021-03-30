@@ -45,7 +45,7 @@ namespace VUModManagerRegistry.Repositories
             return entity;
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        public async Task<bool> DeleteByIdAsync(long id)
         {
             var entity = await Set.FindAsync(id);
             if (entity == null)

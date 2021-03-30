@@ -25,6 +25,6 @@ namespace VUModManagerRegistry.Services.Contracts
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public Task<(bool IsValid, User User)> VerifyToken(Guid token);
+        public Task<(bool IsValid, User User, AccessTokenType TokenType)> VerifyToken(Guid token);
     }
 }
