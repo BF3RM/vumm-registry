@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services.Contracts;
 

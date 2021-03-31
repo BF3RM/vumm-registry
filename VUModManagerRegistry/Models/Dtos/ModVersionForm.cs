@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Binders;
+using VUModManagerRegistry.Models.Dtos;
 
 namespace VUModManagerRegistry.Models
 {

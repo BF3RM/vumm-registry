@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
 
 namespace VUModManagerRegistry.Services.Contracts
 {

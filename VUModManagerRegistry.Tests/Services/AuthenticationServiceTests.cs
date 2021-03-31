@@ -1,11 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
 using VUModManagerRegistry.Services.Contracts;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using VUModManagerRegistry.Models.Dtos;
 
 namespace VUModManagerRegistry.Models.Extensions
 {

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories;
 using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
 using VUModManagerRegistry.Services.Contracts;

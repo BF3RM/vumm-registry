@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace VUModManagerRegistry.Models
+namespace VUModManagerRegistry.Models.Dtos
 {
     public class CredentialsDto
     {

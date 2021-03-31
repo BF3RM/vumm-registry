@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Models.Extensions;
 using VUModManagerRegistry.Services.Contracts;
 
