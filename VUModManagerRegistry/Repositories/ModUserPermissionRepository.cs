@@ -7,7 +7,7 @@ namespace VUModManagerRegistry.Repositories
 {
     public class ModUserPermissionRepository : IModUserPermissionRepository
     {
-        private AppDbContext _context;
+        private readonly AppDbContext _context;
 
         public ModUserPermissionRepository(AppDbContext context)
         {
