@@ -36,7 +36,7 @@ namespace VUModManagerRegistry.Controllers
             catch (UserAlreadyExistsException ex)
             {
                 ModelState.AddModelError(nameof(CredentialsDto.Username), ex.Message);
-                return BadRequest(ModelState);
+                return ValidationProblem(ModelState);
             }
         }
 

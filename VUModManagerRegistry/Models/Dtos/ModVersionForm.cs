@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Binders;
-using VUModManagerRegistry.Models.Dtos;
 
-namespace VUModManagerRegistry.Models
+namespace VUModManagerRegistry.Models.Dtos
 {
     public class ModVersionForm
     {
