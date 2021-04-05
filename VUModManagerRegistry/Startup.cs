@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -6,10 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VUModManagerRegistry.Authentication;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry
 {
@@ -40,14 +42,28 @@ namespace VUModManagerRegistry
             {
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
+            services.AddApiVersioning(options =>
+            {
+                options.ReportApiVersions = true;
+            });
 
             // AuthenticationScheme
             services
                 .AddAuthentication(AccessTokenDefaults.AuthenticationScheme)
                 .AddScheme<AccessTokenOptions, AccessTokenHandler>(AccessTokenDefaults.AuthenticationScheme, null);
+            
+            // Authorization
+            services
+                .AddAuthorization(options =>
+                    options.AddPolicy("CanPublish", policy =>
+                        policy.RequireClaim("TokenType", AccessTokenType.Publish.ToString())))
+                .AddScoped<IAuthorizationHandler, ModAuthorizationHandler>();
 
             // Repositories
             services
+                .AddScoped<IModRepository, ModRepository>()
+                .AddScoped<IModVersionRepository, ModVersionRepository>()
+                .AddScoped<IModUserPermissionRepository, ModUserPermissionRepository>()
                 .AddScoped<IAccessTokenRepository, AccessTokenRepository>()
                 .AddScoped<IUserRepository, UserRepository>();
             
@@ -55,6 +71,7 @@ namespace VUModManagerRegistry
             services
                 .AddScoped<IAccessTokenService, AccessTokenService>()
                 .AddScoped<IAuthenticationService, AuthenticationService>()
+                .AddScoped<IModAuthorizationService, ModAuthorizationService>()
                 .AddScoped<IModService, ModService>()
                 .AddSingleton<IModUploadService, ModUploadService>();
         }

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 
-namespace VUModManagerRegistry.Repositories
+namespace VUModManagerRegistry.Repositories.Contracts
 {
     public interface IUserRepository : IRepository<User>
     {

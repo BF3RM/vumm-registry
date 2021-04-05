@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using VUModManagerRegistry.Interfaces;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
@@ -29,8 +29,6 @@ namespace VUModManagerRegistry.Services
             var modArchivePath = Path.Combine("archive", name, $"{version}.tar.gz");
 
             return File.Open(modArchivePath, FileMode.Open);
-            
-            // return new FileStream(modArchivePath, FileMode.Open);
         }
 
         public Task DeleteModVersionArchive(string name, string version)

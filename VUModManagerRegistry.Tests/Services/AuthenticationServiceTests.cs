@@ -1,13 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Models.Dtos;
+using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Tests.Services
 {
@@ -114,9 +114,10 @@ namespace VUModManagerRegistry.Tests.Services
                 .ReturnsAsync(user);
 
 
-            var (isValid, foundUser) = await _service.VerifyToken(accessToken.Token);
+            var (isValid, foundUser, tokenType) = await _service.VerifyToken(accessToken.Token);
             Assert.IsTrue(isValid);
             Assert.AreEqual(user, foundUser);
+            Assert.AreEqual(tokenType, AccessTokenType.ReadOnly);
         }
     }
 }

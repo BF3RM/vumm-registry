@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Helpers;
-using VUModManagerRegistry.Interfaces;
 
 namespace VUModManagerRegistry.Models
 {
@@ -30,7 +29,7 @@ namespace VUModManagerRegistry.Models
 
             modelBuilder.Entity<UserAccessToken>()
                 .HasIndex(a => a.Token);
-            
+
             modelBuilder.Entity<Mod>(entity =>
             {
                 // Has many versions
@@ -38,6 +37,23 @@ namespace VUModManagerRegistry.Models
                     .HasMany(m => m.Versions)
                     .WithOne()
                     .HasForeignKey(v => v.ModId);
+
+                // Many mods have many users, joined by ModUserPermission
+                entity
+                    .HasMany(m => m.Users)
+                    .WithMany(u => u.Mods)
+                    .UsingEntity<ModUserPermission>(
+                        j => j
+                            .HasOne(mp => mp.User)
+                            .WithMany(u => u.ModPermissions)
+                            .HasForeignKey(mp => mp.UserId),
+                        j => j
+                            .HasOne(mp => mp.Mod)
+                            .WithMany(m => m.UserPermissions)
+                            .HasForeignKey(mp => mp.ModId),
+                        j =>
+                            j.HasKey(mp => new {mp.ModId, mp.UserId})
+                    );
             });
 
             modelBuilder.Entity<ModVersion>(entity =>

@@ -17,6 +17,11 @@ namespace VUModManagerRegistry.Models
         public string Description { get; set; }
         public string Author { get; set; }
         
-        public List<ModVersion> Versions { get; set; }
+        public bool IsPrivate { get; set; }
+        
+        public virtual ICollection<ModVersion> Versions { get; set; }
+        
+        public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<ModUserPermission> UserPermissions { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VUModManagerRegistry.Models;
@@ -9,9 +10,10 @@ using VUModManagerRegistry.Models;
 namespace VUModManagerRegistry.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class RegistryContextModelSnapshot : ModelSnapshot
+    [Migration("20210330100736_AddModUserPermissions")]
+    partial class AddModUserPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,9 +33,6 @@ namespace VUModManagerRegistry.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories;
+using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Tests.Services
 {
@@ -35,7 +35,7 @@ namespace VUModManagerRegistry.Tests.Services
             _repositoryMock.Setup(r => r.FindByUserIdAndTokenAsync(accessToken.UserId, accessToken.Token))
                 .ReturnsAsync(accessToken);
 
-            _repositoryMock.Setup(r => r.DeleteAsync(accessToken.Id)).ReturnsAsync(true);
+            _repositoryMock.Setup(r => r.DeleteByIdAsync(accessToken.Id)).ReturnsAsync(true);
             
             Assert.IsTrue(await _service.Revoke(accessToken.UserId, accessToken.Token));
         }

@@ -1,6 +1,6 @@
 using System;
 
-namespace VUModManagerRegistry.Models
+namespace VUModManagerRegistry.Models.Dtos
 {
     public class UserAccessTokenDto
     {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Models.Extensions;
 
 namespace VUModManagerRegistry.Tests.Extensions
@@ -45,7 +46,7 @@ namespace VUModManagerRegistry.Tests.Extensions
             AssertDtoEqual(accessTokens[1], dtos[1]);
         }
 
-        private void AssertDtoEqual(UserAccessToken accessToken, UserAccessTokenDto dto)
+        private static void AssertDtoEqual(UserAccessToken accessToken, UserAccessTokenDto dto)
         {
             Assert.AreEqual(accessToken.Type, dto.Type);
             Assert.AreEqual(accessToken.Token, dto.Token);

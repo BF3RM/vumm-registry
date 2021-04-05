@@ -2,96 +2,137 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
+using VUModManagerRegistry.Models.Extensions;
+using VUModManagerRegistry.Services;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Controllers
 {
-    [Authorize]
     [ApiController]
-    [Route("/api/mods")]
-    public class ModController : ApiControllerBase
+    [ApiVersion("1")]
+    [Route("/api/v{version:apiVersion}/mods")]
+    public class ModController : ControllerBase
     {
         private readonly IModService _modService;
         private readonly IModUploadService _uploadService;
+        private readonly IAuthorizationService _authorizationService;
 
-        public ModController(IModService modService, IModUploadService uploadService)
+        public ModController(
+            IModService modService,
+            IModUploadService uploadService,
+            IAuthorizationService authorizationService)
         {
             _modService = modService;
             _uploadService = uploadService;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet("{name}")]
         public async Task<ActionResult<ModDto>> GetMod(string name)
         {
-            // TODO: Solve this with modelbinding...
-            name = name.ToLower();
-            
-            var mod = await _modService.GetMod(name);
+            var mod = await _modService.GetMod(name.ToLower());
             if (mod == null)
             {
                 return NotFound();
             }
 
-            return mod;
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            if (authorizationResult.Succeeded)
+            {
+                return mod.ToDto();
+            }
+
+            return Forbid();
         }
-        
-        [HttpGet("{name}/{version}")]
-        public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string version)
+
+        [HttpGet("{name}/{modVersion}")]
+        public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string modVersion)
         {
-            // TODO: Solve this with modelbinding...
-            name = name.ToLower();
-            
-            var modVersion = await _modService.GetModVersion(name, version);
-            if (modVersion == null)
+            var mod = await _modService.GetMod(name.ToLower());
+            if (mod == null)
             {
                 return NotFound();
             }
 
-            return modVersion;
-        }
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
 
-        [HttpGet("{name}/{version}/archive")]
-        public async Task<IActionResult> GetModVersionArchive(string name, string version)
-        {
-            // TODO: Solve this with modelbinding...
-            name = name.ToLower();
-            
-            if (!await _modService.ModVersionExists(name, version))
+            var foundVersion = await _modService.GetModVersion(mod.Name, modVersion);
+            if (foundVersion == null)
             {
                 return NotFound();
             }
 
-            var stream = _uploadService.GetModVersionArchive(name, version);
+            return foundVersion.ToDto();
+        }
+
+        [HttpGet("{name}/{modVersion}/archive")]
+        public async Task<IActionResult> GetModVersionArchive(string name, string modVersion)
+        {
+            var mod = await _modService.GetMod(name.ToLower());
+            if (mod == null)
+            {
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
+            if (!await _modService.ModVersionExists(mod.Name, modVersion))
+            {
+                return NotFound();
+            }
+
+            var stream = _uploadService.GetModVersionArchive(mod.Name, modVersion);
             stream.Position = 0;
             return File(stream, "application/octet-stream", "archive.tar.gz");
         }
         
         
-        [HttpPut("{name}/{version}")]
-        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string version, [FromForm]ModVersionForm modVersionForm)
+        [HttpPut("{name}/{modVersion}")]
+        [Authorize(Policy = "CanPublish")]
+        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, [FromForm]ModVersionForm modVersionForm)
         {
-            // TODO: Solve this with modelbinding...
             name = name.ToLower();
             modVersionForm.Attributes.Name = modVersionForm.Attributes.Name.ToLower();
             
-            if (name != modVersionForm.Attributes.Name || version != modVersionForm.Attributes.Version)
+            if (name != modVersionForm.Attributes.Name || modVersion != modVersionForm.Attributes.Version)
             {
                 return BadRequest();
+            }
+
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Forbid();
+                }
             }
 
             try
             {
                 await using var memoryStream = new MemoryStream();
                 await modVersionForm.Archive.CopyToAsync(memoryStream);
-                var modVersion =
-                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, memoryStream);
+                var createdVersion =
+                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, User.Id(), memoryStream);
 
                 return CreatedAtAction(
                     nameof(GetModVersion),
-                    new {name = modVersion.Name, version = modVersion.Version},
-                    modVersion);
+                    new {name = createdVersion.Name, version = createdVersion.Version},
+                    createdVersion.ToDto());
             }
             catch (ModVersionAlreadyExistsException ex)
             {
@@ -100,10 +141,21 @@ namespace VUModManagerRegistry.Controllers
             }
         }
 
-        [HttpDelete("{name}/{version}")]
-        public async Task<IActionResult> DeleteModVersion(string name, string version)
+        [HttpDelete("{name}/{modVersion}")]
+        public async Task<IActionResult> DeleteModVersion(string name, string modVersion)
         {
-            if (!await _modService.DeleteModVersion(name, version))
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod != null)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+                if (!authorizationResult.Succeeded)
+                {
+                    return Forbid();
+                }
+            }
+            
+            if (!await _modService.DeleteModVersion(name, modVersion))
             {
                 return NotFound();
             }

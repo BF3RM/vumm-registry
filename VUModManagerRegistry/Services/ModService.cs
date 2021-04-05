@@ -1,49 +1,40 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Helpers;
-using VUModManagerRegistry.Interfaces;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
+using VUModManagerRegistry.Repositories.Contracts;
+using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
     public class ModService : IModService
     {
-        private readonly AppDbContext _context;
+        private readonly IModRepository _modRepository;
+        private readonly IModVersionRepository _modVersionRepository;
+        private readonly IModAuthorizationService _modAuthorizationService;
         private readonly IModUploadService _uploadService;
 
-        public ModService(AppDbContext context, IModUploadService uploadService)
+        public ModService(IModRepository modRepository, IModVersionRepository modVersionRepository, IModAuthorizationService modAuthorizationService, IModUploadService uploadService)
         {
-            _context = context;
+            _modRepository = modRepository;
+            _modVersionRepository = modVersionRepository;
+            _modAuthorizationService = modAuthorizationService;
             _uploadService = uploadService;
         }
 
-        public async Task<ModDto> GetMod(string name)
+        public async Task<Mod> GetMod(string name)
         {
-            var mod = await _context.Mods
-                .Include(m => m.Versions)
-                .AsSingleQuery()
-                .SingleOrDefaultAsync(m => m.Name == name);
-
-            return mod == null ? null : ModDtoHelper.ModToDto(mod);
+            return await _modRepository.FindByNameWithVersionsAsync(name);
         }
 
         public async Task<bool> DeleteMod(string name)
         {
-            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == name);
-            if (mod == null)
-            {
-                return false;
-            }
-
-            _context.Mods.Remove(mod);
-            await _context.SaveChangesAsync();
-
-            return true;
+            return await _modRepository.DeleteByNameAsync(name);
         }
 
-        public async Task<ModVersionDto> CreateModVersion(ModVersionDto modVersionDto, string tag, Stream stream)
+        public async Task<ModVersion> CreateModVersion(ModVersionDto modVersionDto, string tag, long userId,
+            Stream stream)
         {
             if (await ModVersionExists(modVersionDto.Name, modVersionDto.Version))
             {
@@ -51,7 +42,7 @@ namespace VUModManagerRegistry.Services
             }
 
             // Get or create the mod
-            var mod = await _CreateOrGetMod(modVersionDto.Name);
+            var mod = await _CreateOrGetMod(modVersionDto.Name, userId);
             
             // Create mod version
             var modVersion = new ModVersion
@@ -62,52 +53,36 @@ namespace VUModManagerRegistry.Services
                 Tag = tag,
                 ModId = mod.Id
             };
-            await _context.ModVersions.AddAsync(modVersion);
-            
-            // Create or update the mod tag
-            // await _CreateOrUpdateModTag(mod.Id, tag, modVersionDto.Version);
-            
-            // Save changes
-            await _context.SaveChangesAsync();
-            
+            await _modVersionRepository.AddAsync(modVersion);
+
             // Upload the archive
             await _uploadService.StoreModVersionArchive(modVersionDto.Name, modVersionDto.Version, stream);
-            
-            return ModDtoHelper.ModVersionToDto(modVersion);
+
+            return modVersion;
         }
 
-        public Task<bool> ModVersionExists(string name, string version)
+        public async Task<bool> ModVersionExists(string name, string version)
         {
-            return _context.ModVersions.AnyAsync(m => m.Name == name && m.Version == version);
+            return await _modVersionRepository.ExistsByNameAndVersionAsync(name, version);
         }
 
-        public async Task<ModVersionDto> GetModVersion(string name, string version)
+        public async Task<ModVersion> GetModVersion(string name, string version)
         {
-            var modVersion = await _context.ModVersions
-                .SingleOrDefaultAsync(m => m.Name == name && m.Version == version);
-
-            return modVersion == null ? null : ModDtoHelper.ModVersionToDto(modVersion);
+            return await _modVersionRepository.FindByNameAndVersion(name, version);
         }
 
         public async Task<bool> DeleteModVersion(string name, string version)
         {
-            var modVersion = await _context.ModVersions
-                .SingleOrDefaultAsync(m => m.Name == name && m.Version == version);
-            
-            if (modVersion == null)
+            var deleted = await _modVersionRepository.DeleteByNameAndVersionAsync(name, version);
+            if (!deleted)
             {
                 return false;
             }
 
-            _context.ModVersions.Remove(modVersion);
-            await _context.SaveChangesAsync();
-            
-            // Delete mod if no versions are left
-            var mod = await _context.Mods.Include(m => m.Versions).SingleOrDefaultAsync(m => m.Name == name);
+            var mod = await _modRepository.FindByNameWithVersionsAsync(name);
             if (mod.Versions.Count == 0)
             {
-                _context.Mods.Remove(mod);
-                await _context.SaveChangesAsync();
+                await _modRepository.DeleteByIdAsync(mod.Id);
             }
 
             await _uploadService.DeleteModVersionArchive(name, version);
@@ -115,19 +90,19 @@ namespace VUModManagerRegistry.Services
             return true;
         }
 
-        private async Task<Mod> _CreateOrGetMod(string name)
+        private async Task<Mod> _CreateOrGetMod(string name, long userId)
         {
-            var mod = await _context.Mods.SingleOrDefaultAsync(m => m.Name == name);
-            if (mod == null)
+            var mod = await _modRepository.FindByNameAsync(name);
+            if (mod != null)
+                return mod;
+            
+            // If mod does not exist yet, create a new one
+            mod = new Mod
             {
-                // If mod does not exist yet, create a new one
-                mod = new Mod
-                {
-                    Name = name
-                };
-                await _context.Mods.AddAsync(mod);
-                await _context.SaveChangesAsync();
-            }
+                Name = name
+            };
+            await _modRepository.AddAsync(mod);
+            await _modAuthorizationService.SetPermission(mod.Id, userId, ModPermission.Publish);
 
             return mod;
         }

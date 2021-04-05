@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Repositories.Contracts;
 
 namespace VUModManagerRegistry.Repositories
 {
@@ -44,7 +45,7 @@ namespace VUModManagerRegistry.Repositories
             return entity;
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        public async Task<bool> DeleteByIdAsync(long id)
         {
             var entity = await Set.FindAsync(id);
             if (entity == null)

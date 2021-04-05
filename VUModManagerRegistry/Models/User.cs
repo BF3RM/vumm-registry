@@ -20,5 +20,8 @@ namespace VUModManagerRegistry.Models
         public string Password { get; set; }
         
         public List<UserAccessToken> AccessTokens { get; set; }
+        
+        public virtual ICollection<Mod> Mods { get; set; }
+        public virtual ICollection<ModUserPermission> ModPermissions { get; set; }
     }
 }

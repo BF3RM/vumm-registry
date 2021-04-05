@@ -1,8 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
 
-namespace VUModManagerRegistry.Interfaces
+namespace VUModManagerRegistry.Services.Contracts
 {
     public interface IAuthenticationService
     {
@@ -25,6 +26,6 @@ namespace VUModManagerRegistry.Interfaces
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public Task<(bool IsValid, User User)> VerifyToken(Guid token);
+        public Task<(bool IsValid, User User, AccessTokenType TokenType)> VerifyToken(Guid token);
     }
 }

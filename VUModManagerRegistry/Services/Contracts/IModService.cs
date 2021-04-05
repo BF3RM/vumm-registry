@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Models.Dtos;
 
-namespace VUModManagerRegistry.Interfaces
+namespace VUModManagerRegistry.Services.Contracts
 {
     public interface IModService
     {
@@ -12,7 +12,7 @@ namespace VUModManagerRegistry.Interfaces
         /// </summary>
         /// <param name="name">mod name</param>
         /// <returns></returns>
-        public Task<ModDto> GetMod(string name);
+        public Task<Mod> GetMod(string name);
 
         /// <summary>
         /// Delete a mod by it's name
@@ -26,9 +26,10 @@ namespace VUModManagerRegistry.Interfaces
         /// </summary>
         /// <param name="modVersion">mod version</param>
         /// <param name="tag">mod version tag</param>
+        /// <param name="userId">user id</param>
         /// <param name="stream">mod version archive stream</param>
         /// <returns></returns>
-        public Task<ModVersionDto> CreateModVersion(ModVersionDto modVersion, string tag, Stream stream);
+        public Task<ModVersion> CreateModVersion(ModVersionDto modVersion, string tag, long userId, Stream stream);
 
         /// <summary>
         /// Check whether a mod version exists
@@ -44,7 +45,7 @@ namespace VUModManagerRegistry.Interfaces
         /// <param name="name">mod name</param>
         /// <param name="version">mod version</param>
         /// <returns></returns>
-        public Task<ModVersionDto> GetModVersion(string name, string version);
+        public Task<ModVersion> GetModVersion(string name, string version);
         
         /// <summary>
         /// Delete a mod version

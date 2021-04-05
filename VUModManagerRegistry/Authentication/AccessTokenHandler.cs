@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Encodings.Web;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using IAuthenticationService = VUModManagerRegistry.Interfaces.IAuthenticationService;
+using IAuthenticationService = VUModManagerRegistry.Services.Contracts.IAuthenticationService;
 
 namespace VUModManagerRegistry.Authentication
 {
@@ -39,14 +38,14 @@ namespace VUModManagerRegistry.Authentication
             if (!authRes.IsValid)
                 return AuthenticateResult.Fail("Unauthorized");
 
-            // var claims = new List<Claim>
-            // {
-            //     new(ClaimTypes.Sid, accessToken.ToString()),
-            //     new(ClaimTypes.Name, authRes.User.Username)
-            // };
-            // var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var identity = new UserIdentity(authRes.User);
-            var principal = new GenericPrincipal(identity, null);
+            var claims = new Claim[]
+            {
+                new("Id", authRes.User.Id.ToString()),
+                new(ClaimTypes.Name, authRes.User.Username),
+                new("TokenType", authRes.TokenType.ToString())
+            };
+            var identity = new ClaimsIdentity(claims);
+            var principal = new ClaimsPrincipal(identity);
 
             return AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name));
         }

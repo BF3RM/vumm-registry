@@ -1,11 +1,11 @@
-﻿using System.Linq;
-using VUModManagerRegistry.Models;
+using System.Linq;
+using VUModManagerRegistry.Models.Dtos;
 
-namespace VUModManagerRegistry.Helpers
+namespace VUModManagerRegistry.Models.Extensions
 {
-    public static class ModDtoHelper
+    public static class ModExtensions
     {
-        public static ModDto ModToDto(Mod mod) =>
+        public static ModDto ToDto(this Mod mod) =>
             new()
             {
                 Name = mod.Name,
@@ -16,10 +16,10 @@ namespace VUModManagerRegistry.Helpers
                     .Select(g => g.Last())
                     .ToDictionary(v => v.Tag, v => v.Version),
                 Versions = mod.Versions
-                    .ToDictionary(v => v.Version, ModVersionToDto)
+                    .ToDictionary(v => v.Version, v => v.ToDto())
             };
         
-        public static ModVersionDto ModVersionToDto(ModVersion modVersion) =>
+        public static ModVersionDto ToDto(this ModVersion modVersion) =>
             new()
             {
                 Name = modVersion.Name,
