@@ -14,7 +14,7 @@ namespace VUModManagerRegistry.Controllers
 {
     [ApiController]
     [ApiVersion("1")]
-    [Route("/api/v{version:apiVersion}/mods")]
+    [Route("/api/v{version:apiVersion}/mods/{name}")]
     public class ModController : ControllerBase
     {
         private readonly IModService _modService;
@@ -31,7 +31,7 @@ namespace VUModManagerRegistry.Controllers
             _authorizationService = authorizationService;
         }
 
-        [HttpGet("{name}")]
+        [HttpGet]
         public async Task<ActionResult<ModDto>> GetMod(string name)
         {
             var mod = await _modService.GetMod(name.ToLower());
@@ -49,7 +49,7 @@ namespace VUModManagerRegistry.Controllers
             return Forbid();
         }
 
-        [HttpGet("{name}/{modVersion}")]
+        [HttpGet("{modVersion}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string modVersion)
         {
             var mod = await _modService.GetMod(name.ToLower());
@@ -73,7 +73,7 @@ namespace VUModManagerRegistry.Controllers
             return foundVersion.ToDto();
         }
 
-        [HttpGet("{name}/{modVersion}/archive")]
+        [HttpGet("{modVersion}/archive")]
         public async Task<IActionResult> GetModVersionArchive(string name, string modVersion)
         {
             var mod = await _modService.GetMod(name.ToLower());
@@ -99,7 +99,7 @@ namespace VUModManagerRegistry.Controllers
         }
         
         
-        [HttpPut("{name}/{modVersion}")]
+        [HttpPut("{modVersion}")]
         [Authorize(Policy = "CanPublish")]
         public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, [FromForm]ModVersionForm modVersionForm)
         {
@@ -131,7 +131,7 @@ namespace VUModManagerRegistry.Controllers
 
                 return CreatedAtAction(
                     nameof(GetModVersion),
-                    new {name = createdVersion.Name, version = createdVersion.Version},
+                    new {name = createdVersion.Name, modVersion = createdVersion.Version},
                     createdVersion.ToDto());
             }
             catch (ModVersionAlreadyExistsException ex)
@@ -141,7 +141,7 @@ namespace VUModManagerRegistry.Controllers
             }
         }
 
-        [HttpDelete("{name}/{modVersion}")]
+        [HttpDelete("{modVersion}")]
         public async Task<IActionResult> DeleteModVersion(string name, string modVersion)
         {
             // Check permissions
