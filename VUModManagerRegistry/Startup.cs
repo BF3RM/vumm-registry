@@ -98,6 +98,16 @@ namespace VUModManagerRegistry
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            
+            MigrateDatabase(app);
+        }
+
+        private void MigrateDatabase(IApplicationBuilder app)
+        {
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+            }
         }
     }
 }
