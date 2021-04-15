@@ -142,6 +142,7 @@ namespace VUModManagerRegistry.Controllers
         }
 
         [HttpDelete("{modVersion}")]
+        [Authorize(Policy = "CanPublish")]
         public async Task<IActionResult> DeleteModVersion(string name, string modVersion)
         {
             // Check permissions
