@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Models;
@@ -19,16 +20,19 @@ namespace VUModManagerRegistry.Controllers
     {
         private readonly IModService _modService;
         private readonly IModUploadService _uploadService;
+        private readonly IModAuthorizationService _modAuthorizationService;
         private readonly IAuthorizationService _authorizationService;
 
         public ModController(
             IModService modService,
             IModUploadService uploadService,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            IModAuthorizationService modAuthorizationService)
         {
             _modService = modService;
             _uploadService = uploadService;
             _authorizationService = authorizationService;
+            _modAuthorizationService = modAuthorizationService;
         }
 
         [HttpGet]
@@ -162,6 +166,70 @@ namespace VUModManagerRegistry.Controllers
             }
 
             return NoContent();
+        }
+        
+        [HttpPost("grant")]
+        [Authorize(Policy = "CanPublish")]
+        public async Task<ActionResult> GrantUserPermission(string name, GrantPermissionDto permissionDto)
+        {
+            if (permissionDto.Username == User.Identity?.Name)
+            {
+                ModelState.AddModelError("Username", "Can not change permissions of yourself");
+                return ValidationProblem(ModelState);
+            }
+            
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod == null)
+            {
+                return NotFound();
+            }
+            
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            if (!await _modAuthorizationService.SetPermission(mod.Id, permissionDto.Username, permissionDto.Permission))
+            {
+                ModelState.AddModelError("Username", "User with given username not found");
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok();
+        }
+        
+        [HttpPost("revoke")]
+        [Authorize(Policy = "CanPublish")]
+        public async Task<ActionResult> RevokeUserPermission(string name, GrantPermissionDto permissionDto)
+        {
+            if (permissionDto.Username == User.Identity?.Name)
+            {
+                ModelState.AddModelError("Username","Can not change permissions of yourself");
+                return ValidationProblem(ModelState);
+            }
+            
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod == null)
+            {
+                return NotFound();
+            }
+            
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            if (!await _modAuthorizationService.RevokePermissions(mod.Id, permissionDto.Username))
+            {
+                ModelState.AddModelError("Username", "User with given username not found");
+                return ValidationProblem(ModelState);
+            }
+
+            return Ok();
         }
     }
 }

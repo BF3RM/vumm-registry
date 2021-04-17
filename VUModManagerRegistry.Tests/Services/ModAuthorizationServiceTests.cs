@@ -21,7 +21,7 @@ namespace VUModManagerRegistry.Tests.Services
         public void Setup()
         {
             _repositoryMock = new Mock<IModUserPermissionRepository>();
-            _service = new ModAuthorizationService(_repositoryMock.Object);
+            _service = new ModAuthorizationService(_repositoryMock.Object, new Mock<IUserRepository>().Object);
         }
 
         [Test]

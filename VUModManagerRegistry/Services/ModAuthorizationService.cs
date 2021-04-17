@@ -8,22 +8,25 @@ namespace VUModManagerRegistry.Services
 {
     public class ModAuthorizationService : IModAuthorizationService
     {
-        private readonly IModUserPermissionRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IModUserPermissionRepository _permissionRepository;
 
-        public ModAuthorizationService(IModUserPermissionRepository repository)
+        public ModAuthorizationService(
+            IModUserPermissionRepository permissionRepository, IUserRepository userRepository)
         {
-            _repository = repository;
+            _permissionRepository = permissionRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<bool> HasAnyPermissions(long modId, long userId, params ModPermission[] permissions)
         {
-            var userPermission = await _repository.FindByModAndUserIdAsync(modId, userId);
+            var userPermission = await _permissionRepository.FindByModAndUserIdAsync(modId, userId);
             return userPermission != null && permissions.Contains(userPermission.Permission);
         }
 
         public async Task<bool> SetPermission(long modId, long userId, ModPermission permission)
         {
-            var userPermission = await _repository.FindByModAndUserIdAsync(modId, userId);
+            var userPermission = await _permissionRepository.FindByModAndUserIdAsync(modId, userId);
             if (userPermission == null)
             {
                 userPermission = new ModUserPermission()
@@ -32,23 +35,45 @@ namespace VUModManagerRegistry.Services
                     UserId = userId,
                     Permission = permission
                 };
-                await _repository.AddAsync(userPermission);
+                await _permissionRepository.AddAsync(userPermission);
                 return true;
             }
 
             if (userPermission.Permission != permission)
             {
                 userPermission.Permission = permission;
-                await _repository.UpdateAsync(userPermission);
+                await _permissionRepository.UpdateAsync(userPermission);
                 return true;
             }
 
             return false;
         }
 
+        public async Task<bool> SetPermission(long modId, string username, ModPermission permission)
+        {
+            var user = await _userRepository.FindByUsernameAsync(username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            return await SetPermission(modId, user.Id, permission);
+        }
+
         public Task<bool> RevokePermissions(long modId, long userId)
         {
-            return _repository.DeleteByModAndUserIdAsync(modId, userId);
+            return _permissionRepository.DeleteByModAndUserIdAsync(modId, userId);
+        }
+
+        public async Task<bool> RevokePermissions(long modId, string username)
+        {
+            var user = await _userRepository.FindByUsernameAsync(username);
+            if (user == null)
+            {
+                return false;
+            }
+
+            return await RevokePermissions(modId, user.Id);
         }
     }
 }
