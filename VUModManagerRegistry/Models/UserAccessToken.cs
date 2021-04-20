@@ -6,7 +6,7 @@ namespace VUModManagerRegistry.Models
 {
     public enum AccessTokenType
     {
-        ReadOnly,
+        Readonly,
         Publish
     }
     

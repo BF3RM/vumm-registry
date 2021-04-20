@@ -36,7 +36,7 @@ namespace VUModManagerRegistry.Tests.Extensions
                 new()
                 {
                     Token = Guid.NewGuid(),
-                    Type = AccessTokenType.ReadOnly
+                    Type = AccessTokenType.Readonly
                 }
             };
 

@@ -41,13 +41,13 @@ namespace VUModManagerRegistry.Tests.Repositories
                 {
                     UserId = _createdUserOne.Id,
                     Token = Guid.NewGuid(),
-                    Type = AccessTokenType.ReadOnly
+                    Type = AccessTokenType.Readonly
                 },
                 new()
                 {
                     UserId = _createdUserOne.Id,
                     Token = Guid.NewGuid(),
-                    Type = AccessTokenType.ReadOnly
+                    Type = AccessTokenType.Readonly
                 }
             };
             await Context.AccessTokens.AddRangeAsync(_createdTokensOne);
@@ -58,13 +58,13 @@ namespace VUModManagerRegistry.Tests.Repositories
                 {
                     UserId = _createdUserTwo.Id,
                     Token = Guid.NewGuid(),
-                    Type = AccessTokenType.ReadOnly
+                    Type = AccessTokenType.Readonly
                 },
                 new()
                 {
                     UserId = _createdUserTwo.Id,
                     Token = Guid.NewGuid(),
-                    Type = AccessTokenType.ReadOnly
+                    Type = AccessTokenType.Readonly
                 }
             };
             await Context.AccessTokens.AddRangeAsync(_createdTokensTwo);

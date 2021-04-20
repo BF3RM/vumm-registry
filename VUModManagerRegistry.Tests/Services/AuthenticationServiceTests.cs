@@ -104,7 +104,7 @@ namespace VUModManagerRegistry.Tests.Services
                 Id = 1,
                 UserId = user.Id,
                 Token = Guid.NewGuid(),
-                Type = AccessTokenType.ReadOnly
+                Type = AccessTokenType.Readonly
             };
 
             _accessTokenRepositoryMock.Setup(r => r.FindByTokenAsync(accessToken.Token))
@@ -117,7 +117,7 @@ namespace VUModManagerRegistry.Tests.Services
             var (isValid, foundUser, tokenType) = await _service.VerifyToken(accessToken.Token);
             Assert.IsTrue(isValid);
             Assert.AreEqual(user, foundUser);
-            Assert.AreEqual(tokenType, AccessTokenType.ReadOnly);
+            Assert.AreEqual(tokenType, AccessTokenType.Readonly);
         }
     }
 }

@@ -62,7 +62,7 @@ namespace VUModManagerRegistry.Services
             var accessToken = await _accessTokenRepository.FindByTokenAsync(token);
             if (accessToken == null)
             {
-                return (false, null, AccessTokenType.ReadOnly);
+                return (false, null, AccessTokenType.Readonly);
             }
 
             var user = await _userRepository.FindByIdAsync(accessToken.UserId);
