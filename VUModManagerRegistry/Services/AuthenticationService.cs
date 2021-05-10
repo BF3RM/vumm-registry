@@ -31,7 +31,7 @@ namespace VUModManagerRegistry.Services
             var user = new User()
             {
                 Username = credentials.Username,
-                Password = await EncryptPassword(credentials.Password)
+                Password = EncryptPassword(credentials.Password)
             };
 
             await _userRepository.AddAsync(user);
@@ -48,7 +48,7 @@ namespace VUModManagerRegistry.Services
                 return (false, null);
             }
 
-            if (!await VerifyPassword(user.Password, credentials.Password))
+            if (!VerifyPassword(user.Password, credentials.Password))
             {
                 return (false, null);
             }
@@ -82,14 +82,14 @@ namespace VUModManagerRegistry.Services
             return await _accessTokenRepository.AddAsync(accessToken);
         }
         
-        private static Task<string> EncryptPassword(string password)
+        private static string EncryptPassword(string password)
         {
-            return Task.Run(() => BCrypt.Net.BCrypt.HashPassword(password));
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        private static Task<bool> VerifyPassword(string hash, string password)
+        private static bool VerifyPassword(string hash, string password)
         {
-            return Task.Run(() => BCrypt.Net.BCrypt.Verify(password, hash));
+            return BCrypt.Net.BCrypt.Verify(password, hash);
         }
     }
 }
