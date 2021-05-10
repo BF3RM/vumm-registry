@@ -85,7 +85,7 @@ namespace VUModManagerRegistry.Services
                 await _modRepository.DeleteByIdAsync(mod.Id);
             }
 
-            await _uploadService.DeleteModVersionArchive(name, version);
+            _uploadService.DeleteModVersionArchive(name, version);
 
             return true;
         }

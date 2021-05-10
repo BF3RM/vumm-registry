@@ -28,6 +28,6 @@ namespace VUModManagerRegistry.Services.Contracts
         /// <param name="name">mod name</param>
         /// <param name="version">mod version</param>
         /// <returns></returns>
-        public Task DeleteModVersionArchive(string name, string version);
+        public void DeleteModVersionArchive(string name, string version);
     }
 }

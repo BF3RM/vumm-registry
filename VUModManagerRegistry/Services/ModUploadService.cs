@@ -31,12 +31,12 @@ namespace VUModManagerRegistry.Services
             return File.Open(modArchivePath, FileMode.Open);
         }
 
-        public Task DeleteModVersionArchive(string name, string version)
+        public void DeleteModVersionArchive(string name, string version)
         {
             // TODO: escape paths, don't allow ../ for example!
             var modArchivePath = Path.Combine("archive", name, $"{version}.tar.gz");
-
-            return Task.Run(() => File.Delete(modArchivePath));
+            
+            File.Delete(modArchivePath);
         }
     }
 }
