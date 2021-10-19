@@ -26,7 +26,7 @@ namespace VUModManagerRegistry.Services
 
         public async Task<bool> HasAnyPermissions(long modId, long userId, string tag, params ModPermission[] permissions)
         {
-            var userPermission = await _permissionRepository.FindAsync(modId, userId, tag);
+            var userPermission = await _permissionRepository.FindAsync(modId, userId, tag, "");
             return userPermission != null && permissions.Contains(userPermission.Permission);
         }
 
@@ -40,7 +40,7 @@ namespace VUModManagerRegistry.Services
                     ModId = modId,
                     UserId = userId,
                     Permission = permission,
-                    Tag = tag
+                    Tag = tag ?? ""
                 };
                 await _permissionRepository.AddAsync(userPermission);
                 return true;
@@ -50,10 +50,9 @@ namespace VUModManagerRegistry.Services
             {
                 userPermission.Permission = permission;
                 await _permissionRepository.UpdateAsync(userPermission);
-                return true;
             }
 
-            return false;
+            return true;
         }
 
         public async Task<bool> SetPermission(long modId, long userId, ModPermission permission)
@@ -61,7 +60,7 @@ namespace VUModManagerRegistry.Services
             return await SetPermission(modId, userId, "", permission);
         }
 
-        public async Task<bool> SetPermission(long modId, string username, ModPermission permission)
+        public async Task<bool> SetPermission(long modId, string username, string tag, ModPermission permission)
         {
             var user = await _userRepository.FindByUsernameAsync(username);
             if (user == null)
@@ -69,15 +68,15 @@ namespace VUModManagerRegistry.Services
                 return false;
             }
 
-            return await SetPermission(modId, user.Id, permission);
+            return await SetPermission(modId, user.Id, tag, permission);
         }
 
-        public Task<bool> RevokePermissions(long modId, long userId)
+        public Task<bool> RevokePermissions(long modId, long userId, string tag = "")
         {
-            return _permissionRepository.DeleteByModAndUserIdAsync(modId, userId);
+            return _permissionRepository.DeleteAsync(modId, userId, tag ?? "");
         }
 
-        public async Task<bool> RevokePermissions(long modId, string username)
+        public async Task<bool> RevokePermissions(long modId, string username, string tag)
         {
             var user = await _userRepository.FindByUsernameAsync(username);
             if (user == null)
@@ -85,7 +84,7 @@ namespace VUModManagerRegistry.Services
                 return false;
             }
 
-            return await RevokePermissions(modId, user.Id);
+            return await RevokePermissions(modId, user.Id, tag);
         }
     }
 }

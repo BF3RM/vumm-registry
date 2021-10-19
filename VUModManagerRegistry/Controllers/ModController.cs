@@ -178,7 +178,7 @@ namespace VUModManagerRegistry.Controllers
                 return Forbid();
             }
 
-            if (!await _modAuthorizationService.SetPermission(mod.Id, permissionDto.Username, permissionDto.Permission))
+            if (!await _modAuthorizationService.SetPermission(mod.Id, permissionDto.Username, permissionDto.Tag, permissionDto.Permission))
             {
                 ModelState.AddModelError("Username", "User with given username not found");
                 return ValidationProblem(ModelState);
@@ -189,7 +189,7 @@ namespace VUModManagerRegistry.Controllers
         
         [HttpPost("revoke")]
         [Authorize(Policy = "CanPublish")]
-        public async Task<ActionResult> RevokeUserPermission(string name, GrantPermissionDto permissionDto)
+        public async Task<ActionResult> RevokeUserPermission(string name, RevokePermissionDto permissionDto)
         {
             if (permissionDto.Username == User.Identity?.Name)
             {
@@ -210,7 +210,7 @@ namespace VUModManagerRegistry.Controllers
                 return Forbid();
             }
 
-            if (!await _modAuthorizationService.RevokePermissions(mod.Id, permissionDto.Username))
+            if (!await _modAuthorizationService.RevokePermissions(mod.Id, permissionDto.Username, permissionDto.Tag))
             {
                 ModelState.AddModelError("Username", "User with given username not found");
                 return ValidationProblem(ModelState);

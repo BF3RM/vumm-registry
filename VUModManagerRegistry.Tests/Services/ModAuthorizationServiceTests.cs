@@ -84,10 +84,10 @@ namespace VUModManagerRegistry.Tests.Services
         public async Task RevokePermissions_ShouldReturnTrueIfRemoved(bool removed)
         {
             _repositoryMock
-                .Setup(r => r.DeleteByModAndUserIdAsync(ModId, UserId))
+                .Setup(r => r.DeleteAsync(ModId, UserId, ""))
                 .ReturnsAsync(removed);
             
-            Assert.AreEqual(removed, await _service.RevokePermissions(ModId, UserId));
+            Assert.AreEqual(removed, await _service.RevokePermissions(ModId, UserId, ""));
         }
     }
 }
