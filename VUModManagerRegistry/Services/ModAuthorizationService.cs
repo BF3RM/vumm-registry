@@ -20,20 +20,27 @@ namespace VUModManagerRegistry.Services
 
         public async Task<bool> HasAnyPermissions(long modId, long userId, params ModPermission[] permissions)
         {
-            var userPermission = await _permissionRepository.FindByModAndUserIdAsync(modId, userId);
+            var userPermission = await _permissionRepository.FindAsync(modId, userId);
             return userPermission != null && permissions.Contains(userPermission.Permission);
         }
 
-        public async Task<bool> SetPermission(long modId, long userId, ModPermission permission)
+        public async Task<bool> HasAnyPermissions(long modId, long userId, string tag, params ModPermission[] permissions)
         {
-            var userPermission = await _permissionRepository.FindByModAndUserIdAsync(modId, userId);
+            var userPermission = await _permissionRepository.FindAsync(modId, userId, tag);
+            return userPermission != null && permissions.Contains(userPermission.Permission);
+        }
+
+        public async Task<bool> SetPermission(long modId, long userId, string tag, ModPermission permission)
+        {
+            var userPermission = await _permissionRepository.FindAsync(modId, userId, tag);
             if (userPermission == null)
             {
                 userPermission = new ModUserPermission()
                 {
                     ModId = modId,
                     UserId = userId,
-                    Permission = permission
+                    Permission = permission,
+                    Tag = tag
                 };
                 await _permissionRepository.AddAsync(userPermission);
                 return true;
@@ -47,6 +54,11 @@ namespace VUModManagerRegistry.Services
             }
 
             return false;
+        }
+
+        public async Task<bool> SetPermission(long modId, long userId, ModPermission permission)
+        {
+            return await SetPermission(modId, userId, "", permission);
         }
 
         public async Task<bool> SetPermission(long modId, string username, ModPermission permission)

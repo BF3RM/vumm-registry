@@ -56,22 +56,16 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("{modVersion}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string modVersion)
         {
-            var mod = await _modService.GetMod(name.ToLower());
-            if (mod == null)
-            {
-                return NotFound();
-            }
-
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
-
-            var foundVersion = await _modService.GetModVersion(mod.Name, modVersion);
+            var foundVersion = await _modService.GetModVersion(name, modVersion);
             if (foundVersion == null)
             {
                 return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
             }
 
             return foundVersion.ToDto();
@@ -80,24 +74,19 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("{modVersion}/archive")]
         public async Task<IActionResult> GetModVersionArchive(string name, string modVersion)
         {
-            var mod = await _modService.GetMod(name.ToLower());
-            if (mod == null)
+            var foundVersion = await _modService.GetModVersion(name, modVersion);
+            if (foundVersion == null)
             {
                 return NotFound();
             }
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
             if (!authorizationResult.Succeeded)
             {
                 return Forbid();
             }
-            
-            if (!await _modService.ModVersionExists(mod.Name, modVersion))
-            {
-                return NotFound();
-            }
 
-            var stream = _uploadService.GetModVersionArchive(mod.Name, modVersion);
+            var stream = _uploadService.GetModVersionArchive(foundVersion.Name, foundVersion.Version);
             stream.Position = 0;
             return File(stream, "application/octet-stream", "archive.tar.gz");
         }
@@ -149,21 +138,19 @@ namespace VUModManagerRegistry.Controllers
         [Authorize(Policy = "CanPublish")]
         public async Task<IActionResult> DeleteModVersion(string name, string modVersion)
         {
-            // Check permissions
-            var mod = await _modService.GetMod(name);
-            if (mod != null)
-            {
-                var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
-                if (!authorizationResult.Succeeded)
-                {
-                    return Forbid();
-                }
-            }
-            
-            if (!await _modService.DeleteModVersion(name, modVersion))
+            var foundVersion = await _modService.GetModVersion(name, modVersion);
+            if (foundVersion == null)
             {
                 return NotFound();
             }
+            
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Publish);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            await _modService.DeleteModVersion(name, modVersion);
 
             return NoContent();
         }

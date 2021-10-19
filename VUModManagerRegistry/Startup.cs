@@ -59,7 +59,8 @@ namespace VUModManagerRegistry
                 .AddAuthorization(options =>
                     options.AddPolicy("CanPublish", policy =>
                         policy.RequireClaim("TokenType", AccessTokenType.Publish.ToString())))
-                .AddScoped<IAuthorizationHandler, ModAuthorizationHandler>();
+                .AddScoped<IAuthorizationHandler, ModAuthorizationHandler>()
+                .AddScoped<IAuthorizationHandler, ModVersionAuthorizationHandler>();
 
             // Repositories
             services

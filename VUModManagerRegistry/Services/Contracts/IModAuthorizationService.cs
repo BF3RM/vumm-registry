@@ -10,9 +10,11 @@ namespace VUModManagerRegistry.Services.Contracts
         /// </summary>
         /// <param name="modId">the mod id</param>
         /// <param name="userId">the user id</param>
+        /// <param name="tag">the version tag</param>
         /// <param name="permissions">the permissions to check</param>
         /// <returns></returns>
         Task<bool> HasAnyPermissions(long modId, long userId, params ModPermission[] permissions);
+        Task<bool> HasAnyPermissions(long modId, long userId, string tag, params ModPermission[] permissions);
         
         /// <summary>
         /// Add mod permission to user

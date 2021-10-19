@@ -20,5 +20,7 @@ namespace VUModManagerRegistry.Models
         
         [Required]
         public ModPermission Permission { get; set; }
+        
+        public string Tag { get; set; }
     }
 }

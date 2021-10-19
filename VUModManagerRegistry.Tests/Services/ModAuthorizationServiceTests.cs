@@ -35,7 +35,7 @@ namespace VUModManagerRegistry.Tests.Services
         {
             var modUserPermission = new ModUserPermission {Permission = ModPermission.Readonly};
             _repositoryMock
-                .Setup(r => r.FindByModAndUserIdAsync(ModId, UserId))
+                .Setup(r => r.FindAsync(ModId, UserId))
                 .ReturnsAsync(modUserPermission);
             
             Assert.IsFalse(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Publish));
@@ -46,7 +46,7 @@ namespace VUModManagerRegistry.Tests.Services
         {
             var modUserPermission = new ModUserPermission {Permission = ModPermission.Readonly};
             _repositoryMock
-                .Setup(r => r.FindByModAndUserIdAsync(ModId, UserId))
+                .Setup(r => r.FindAsync(ModId, UserId))
                 .ReturnsAsync(modUserPermission);
             
             Assert.IsTrue(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Publish, ModPermission.Readonly));
@@ -68,7 +68,7 @@ namespace VUModManagerRegistry.Tests.Services
         {
             var modUserPermission = new ModUserPermission {Permission = ModPermission.Readonly};
             _repositoryMock
-                .Setup(r => r.FindByModAndUserIdAsync(ModId, UserId))
+                .Setup(r => r.FindAsync(ModId, UserId))
                 .ReturnsAsync(modUserPermission);
             
             Assert.AreEqual(changed, await _service.SetPermission(ModId, UserId, setToPermission));

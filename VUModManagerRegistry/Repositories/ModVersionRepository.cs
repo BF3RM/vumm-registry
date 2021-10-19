@@ -13,7 +13,9 @@ namespace VUModManagerRegistry.Repositories
 
         public async Task<ModVersion> FindByNameAndVersion(string name, string version)
         {
-            return await Set.FirstOrDefaultAsync(m => m.Name == name && m.Version == version);
+            return await Set
+                .Include(m => m.Mod)
+                .FirstOrDefaultAsync(m => m.Name == name && m.Version == version);
         }
 
         public async Task<bool> ExistsByNameAndVersionAsync(string name, string version)

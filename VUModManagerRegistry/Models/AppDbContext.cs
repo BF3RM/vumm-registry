@@ -52,7 +52,7 @@ namespace VUModManagerRegistry.Models
                             .WithMany(m => m.UserPermissions)
                             .HasForeignKey(mp => mp.ModId),
                         j =>
-                            j.HasKey(mp => new {mp.ModId, mp.UserId})
+                            j.HasKey(mp => new {mp.ModId, mp.UserId, mp.Tag})
                     );
             });
 
@@ -66,6 +66,10 @@ namespace VUModManagerRegistry.Models
                     )
                     .Metadata.SetValueComparer(DictionaryHelpers.StringValueComparer);
 
+                entity.HasOne(mp => mp.Mod)
+                    .WithMany(m => m.Versions)
+                    .HasForeignKey(mp => mp.ModId);
+                
                 entity
                     .HasIndex(v => new {v.Name, v.Version})
                     .IsUnique();
