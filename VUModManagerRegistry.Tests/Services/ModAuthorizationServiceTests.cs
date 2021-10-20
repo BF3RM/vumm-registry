@@ -27,46 +27,46 @@ namespace VUModManagerRegistry.Tests.Services
         [Test]
         public async Task HasAnyPermissions_ShouldReturnFalseIfNullPermissions()
         {
-            Assert.IsFalse(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Readonly));
+            Assert.IsFalse(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Read));
         }
 
         [Test]
         public async Task HasAnyPermissions_ShouldReturnFalseIfNoneMatch()
         {
-            var modUserPermission = new ModUserPermission {Permission = ModPermission.Readonly};
+            var modUserPermission = new ModUserPermission {Permission = ModPermission.Read};
             _repositoryMock
                 .Setup(r => r.FindAsync(ModId, UserId))
                 .ReturnsAsync(modUserPermission);
             
-            Assert.IsFalse(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Publish));
+            Assert.IsFalse(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Write));
         }
 
         [Test]
         public async Task HasAnyPermissions_ShouldReturnTrueIfOneMatches()
         {
-            var modUserPermission = new ModUserPermission {Permission = ModPermission.Readonly};
+            var modUserPermission = new ModUserPermission {Permission = ModPermission.Read};
             _repositoryMock
                 .Setup(r => r.FindAsync(ModId, UserId))
                 .ReturnsAsync(modUserPermission);
             
-            Assert.IsTrue(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Publish, ModPermission.Readonly));
+            Assert.IsTrue(await _service.HasAnyPermissions(ModId, UserId, ModPermission.Write, ModPermission.Read));
         }
         
         [Test]
         public async Task SetPermission_ShouldAddIfNotExisting()
         {
-            Assert.IsTrue(await _service.SetPermission(ModId, UserId, ModPermission.Readonly));
+            Assert.IsTrue(await _service.SetPermission(ModId, UserId, ModPermission.Read));
             
             _repositoryMock.Verify(r => r.AddAsync(
-                It.Is<ModUserPermission>(p => p.Permission == ModPermission.Readonly)
+                It.Is<ModUserPermission>(p => p.Permission == ModPermission.Read)
                 ), Times.Once());
         }
 
-        [TestCase(ModPermission.Publish, true)]
-        [TestCase(ModPermission.Readonly, false)]
+        [TestCase(ModPermission.Write, true)]
+        [TestCase(ModPermission.Read, false)]
         public async Task SetPermission_ShouldUpdateExistingPermissionIfDifferent(ModPermission setToPermission, bool changed)
         {
-            var modUserPermission = new ModUserPermission {Permission = ModPermission.Readonly};
+            var modUserPermission = new ModUserPermission {Permission = ModPermission.Read};
             _repositoryMock
                 .Setup(r => r.FindAsync(ModId, UserId))
                 .ReturnsAsync(modUserPermission);

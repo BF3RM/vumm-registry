@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,7 +13,7 @@ namespace VUModManagerRegistry.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
-        
+
         [Required]
         public string Username { get; set; }
         
@@ -23,5 +24,8 @@ namespace VUModManagerRegistry.Models
         
         public virtual ICollection<Mod> Mods { get; set; }
         public virtual ICollection<ModUserPermission> ModPermissions { get; set; }
+        
+        public DateTime Created { get; set; }
+        public DateTime LastUpdated { get; set; }
     }
 }

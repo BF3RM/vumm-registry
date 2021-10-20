@@ -5,8 +5,8 @@ namespace VUModManagerRegistry.Models
 {
     public enum ModPermission
     {
-        Readonly,
-        Publish
+        Read,
+        Write
     }
     
     [Table("ModUserPermissions")]

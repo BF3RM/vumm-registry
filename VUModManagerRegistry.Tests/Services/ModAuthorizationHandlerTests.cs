@@ -44,8 +44,8 @@ namespace VUModManagerRegistry.Tests.Services
         public async Task Authorize_ReadShouldSucceedIfPrivateAndPermissions()
         {
             _serviceMock.Setup(s =>
-                    s.HasAnyPermissions(It.IsAny<long>(), It.IsAny<long>(), ModPermission.Readonly,
-                        ModPermission.Publish))
+                    s.HasAnyPermissions(It.IsAny<long>(), It.IsAny<long>(), ModPermission.Read,
+                        ModPermission.Write))
                 .ReturnsAsync(true);
             var mod = new Mod {IsPrivate = true};
             await AssertRequirementSucceed(mod, ModOperations.Read);
@@ -55,7 +55,7 @@ namespace VUModManagerRegistry.Tests.Services
         [TestCase(false)]
         public async Task Authorize_PublishShouldSucceedIfPublishPermissions(bool hasPermission)
         {
-            _serviceMock.Setup(s => s.HasAnyPermissions(It.IsAny<long>(), It.IsAny<long>(), ModPermission.Publish))
+            _serviceMock.Setup(s => s.HasAnyPermissions(It.IsAny<long>(), It.IsAny<long>(), ModPermission.Write))
                 .ReturnsAsync(hasPermission);
 
             await AssertRequirementSucceed(new Mod(), ModOperations.Publish, hasPermission);

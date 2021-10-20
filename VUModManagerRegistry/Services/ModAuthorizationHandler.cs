@@ -28,7 +28,7 @@ namespace VUModManagerRegistry.Services
                     context.Succeed(requirement);
                 }
                 else if (await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(),
-                    ModPermission.Readonly, ModPermission.Publish))
+                    ModPermission.Read, ModPermission.Write))
                 {
                     context.Succeed(requirement);
                 }
@@ -40,7 +40,7 @@ namespace VUModManagerRegistry.Services
             if (requirement.Name == ModOperations.Publish.Name)
             {
                 if (await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(),
-                    ModPermission.Publish))
+                    ModPermission.Write))
                 {
                     context.Succeed(requirement);
                 }

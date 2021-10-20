@@ -16,7 +16,10 @@ namespace VUModManagerRegistry.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
-        
+
+        public DateTime Created { get; set; }
+        public DateTime LastUpdated { get; set; }
+
         public long UserId { get; set; }
         public User User { get; set; }
         

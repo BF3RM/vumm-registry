@@ -102,7 +102,7 @@ namespace VUModManagerRegistry.Services
                 Name = name
             };
             await _modRepository.AddAsync(mod);
-            await _modAuthorizationService.SetPermission(mod.Id, userId, ModPermission.Publish);
+            await _modAuthorizationService.SetPermission(mod.Id, userId, ModPermission.Write);
 
             return mod;
         }
