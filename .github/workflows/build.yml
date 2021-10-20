@@ -28,7 +28,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"BF3RM_vumm-registry" /o:"bf3realitymod" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs,**/Migrations/*.cs,**/Repositories/*.cs,VUModManagerRegistry.Tests/**,**/*Tests.cs" /d:sonar.cs.opencover.reportsPaths="*/coverage.opencover.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"BF3RM_vumm-registry" /o:"bf3realitymod" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.exclusions="**/Program.cs,**/Startup.cs,**/Migrations/*.cs,**/Repositories/*.cs,VUModManagerRegistry.Tests/**,**/*Tests.cs" /d:sonar.cs.opencover.reportsPaths="*/coverage.opencover.xml"
           dotnet build
           dotnet test VUModManagerRegistry.Tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByFile="**/Migrations/*.cs"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
