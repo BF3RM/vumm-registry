@@ -19,6 +19,7 @@ namespace VUModManagerRegistry.Controllers
     public class ModController : ControllerBase
     {
         private readonly IModService _modService;
+        // private readonly IModVersionCacheService _modVersionCacheService;
         private readonly IModUploadService _uploadService;
         private readonly IModAuthorizationService _modAuthorizationService;
         private readonly IAuthorizationService _authorizationService;
@@ -45,33 +46,30 @@ namespace VUModManagerRegistry.Controllers
             }
 
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
-            if (authorizationResult.Succeeded)
+            if (!authorizationResult.Succeeded)
             {
-                return mod.ToDto();
+                return Forbid();
             }
+            
+            // Filter out non supported versions
+            mod.Versions = await _modService.GetAllowedModVersions(mod.Name, User.Id());
 
-            return Forbid();
+            return mod.ToDto();
         }
 
         [HttpGet("{modVersion}")]
         public async Task<ActionResult<ModVersionDto>> GetModVersion(string name, string modVersion)
         {
-            var mod = await _modService.GetMod(name.ToLower());
-            if (mod == null)
-            {
-                return NotFound();
-            }
-
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
-
-            var foundVersion = await _modService.GetModVersion(mod.Name, modVersion);
+            var foundVersion = await _modService.GetModVersion(name, modVersion);
             if (foundVersion == null)
             {
                 return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
             }
 
             return foundVersion.ToDto();
@@ -80,24 +78,19 @@ namespace VUModManagerRegistry.Controllers
         [HttpGet("{modVersion}/archive")]
         public async Task<IActionResult> GetModVersionArchive(string name, string modVersion)
         {
-            var mod = await _modService.GetMod(name.ToLower());
-            if (mod == null)
+            var foundVersion = await _modService.GetModVersion(name, modVersion);
+            if (foundVersion == null)
             {
                 return NotFound();
             }
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
             if (!authorizationResult.Succeeded)
             {
                 return Forbid();
             }
-            
-            if (!await _modService.ModVersionExists(mod.Name, modVersion))
-            {
-                return NotFound();
-            }
 
-            var stream = _uploadService.GetModVersionArchive(mod.Name, modVersion);
+            var stream = _uploadService.GetModVersionArchive(foundVersion.Name, foundVersion.Version);
             stream.Position = 0;
             return File(stream, "application/octet-stream", "archive.tar.gz");
         }
@@ -151,13 +144,15 @@ namespace VUModManagerRegistry.Controllers
         {
             // Check permissions
             var mod = await _modService.GetMod(name);
-            if (mod != null)
+            if (mod == null)
             {
-                var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
-                if (!authorizationResult.Succeeded)
-                {
-                    return Forbid();
-                }
+                return NotFound();
+            }
+            
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
             }
             
             if (!await _modService.DeleteModVersion(name, modVersion))
@@ -191,7 +186,7 @@ namespace VUModManagerRegistry.Controllers
                 return Forbid();
             }
 
-            if (!await _modAuthorizationService.SetPermission(mod.Id, permissionDto.Username, permissionDto.Permission))
+            if (!await _modAuthorizationService.SetPermission(mod.Id, permissionDto.Username, permissionDto.Tag, permissionDto.Permission))
             {
                 ModelState.AddModelError("Username", "User with given username not found");
                 return ValidationProblem(ModelState);
@@ -202,7 +197,7 @@ namespace VUModManagerRegistry.Controllers
         
         [HttpPost("revoke")]
         [Authorize(Policy = "CanPublish")]
-        public async Task<ActionResult> RevokeUserPermission(string name, GrantPermissionDto permissionDto)
+        public async Task<ActionResult> RevokeUserPermission(string name, RevokePermissionDto permissionDto)
         {
             if (permissionDto.Username == User.Identity?.Name)
             {
@@ -223,7 +218,7 @@ namespace VUModManagerRegistry.Controllers
                 return Forbid();
             }
 
-            if (!await _modAuthorizationService.RevokePermissions(mod.Id, permissionDto.Username))
+            if (!await _modAuthorizationService.RevokePermissions(mod.Id, permissionDto.Username, permissionDto.Tag))
             {
                 ModelState.AddModelError("Username", "User with given username not found");
                 return ValidationProblem(ModelState);

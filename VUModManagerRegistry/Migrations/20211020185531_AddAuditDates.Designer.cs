@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VUModManagerRegistry.Models;
@@ -9,9 +10,10 @@ using VUModManagerRegistry.Models;
 namespace VUModManagerRegistry.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class RegistryContextModelSnapshot : ModelSnapshot
+    [Migration("20211020185531_AddAuditDates")]
+    partial class AddAuditDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

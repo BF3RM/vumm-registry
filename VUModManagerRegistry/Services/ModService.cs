@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Exceptions;
 using VUModManagerRegistry.Models;
@@ -23,14 +24,19 @@ namespace VUModManagerRegistry.Services
             _uploadService = uploadService;
         }
 
-        public async Task<Mod> GetMod(string name)
+        public Task<Mod> GetMod(string name)
         {
-            return await _modRepository.FindByNameWithVersionsAsync(name);
+            return _modRepository.FindByNameAsync(name);
         }
 
-        public async Task<bool> DeleteMod(string name)
+        public Task<List<ModVersion>> GetAllowedModVersions(string name, long userId)
         {
-            return await _modRepository.DeleteByNameAsync(name);
+            return _modVersionRepository.FindAllowedVersions(name, userId);
+        }
+
+        public Task<bool> DeleteMod(string name)
+        {
+            return _modRepository.DeleteByNameAsync(name);
         }
 
         public async Task<ModVersion> CreateModVersion(ModVersionDto modVersionDto, string tag, long userId,
@@ -61,14 +67,14 @@ namespace VUModManagerRegistry.Services
             return modVersion;
         }
 
-        public async Task<bool> ModVersionExists(string name, string version)
+        public Task<bool> ModVersionExists(string name, string version)
         {
-            return await _modVersionRepository.ExistsByNameAndVersionAsync(name, version);
+            return _modVersionRepository.ExistsByNameAndVersionAsync(name, version);
         }
 
-        public async Task<ModVersion> GetModVersion(string name, string version)
+        public Task<ModVersion> GetModVersion(string name, string version)
         {
-            return await _modVersionRepository.FindByNameAndVersion(name, version);
+            return _modVersionRepository.FindByNameAndVersion(name, version);
         }
 
         public async Task<bool> DeleteModVersion(string name, string version)
@@ -102,7 +108,7 @@ namespace VUModManagerRegistry.Services
                 Name = name
             };
             await _modRepository.AddAsync(mod);
-            await _modAuthorizationService.SetPermission(mod.Id, userId, ModPermission.Publish);
+            await _modAuthorizationService.SetPermission(mod.Id, userId, ModPermission.Write);
 
             return mod;
         }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VUModManagerRegistry.Models;
@@ -9,9 +10,10 @@ using VUModManagerRegistry.Models;
 namespace VUModManagerRegistry.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class RegistryContextModelSnapshot : ModelSnapshot
+    [Migration("20211019193229_AddTagToModUserPermissions")]
+    partial class AddTagToModUserPermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,17 +31,11 @@ namespace VUModManagerRegistry.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsPrivate")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -82,17 +78,11 @@ namespace VUModManagerRegistry.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("Dependencies")
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long>("ModId")
                         .HasColumnType("bigint");
@@ -124,12 +114,6 @@ namespace VUModManagerRegistry.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("text");
@@ -150,13 +134,7 @@ namespace VUModManagerRegistry.Migrations
                         .HasColumnType("bigint")
                         .UseIdentityByDefaultColumn();
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("Token")
@@ -198,13 +176,11 @@ namespace VUModManagerRegistry.Migrations
 
             modelBuilder.Entity("VUModManagerRegistry.Models.ModVersion", b =>
                 {
-                    b.HasOne("VUModManagerRegistry.Models.Mod", "Mod")
+                    b.HasOne("VUModManagerRegistry.Models.Mod", null)
                         .WithMany("Versions")
                         .HasForeignKey("ModId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Mod");
                 });
 
             modelBuilder.Entity("VUModManagerRegistry.Models.UserAccessToken", b =>

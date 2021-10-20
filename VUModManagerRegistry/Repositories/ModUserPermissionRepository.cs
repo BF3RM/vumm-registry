@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Models;
@@ -14,8 +15,14 @@ namespace VUModManagerRegistry.Repositories
             _context = context;
         }
 
-        public async Task<ModUserPermission> FindByModAndUserIdAsync(long modId, long userId)
+        public async Task<ModUserPermission> FindAsync(long modId, long userId, params string[] tags)
         {
+            if (tags.Length > 0)
+            {
+                return await _context.Set<ModUserPermission>()
+                    .FirstOrDefaultAsync(p => p.ModId == modId && p.UserId == userId && tags.Contains(p.Tag));
+            }
+            
             return await _context.Set<ModUserPermission>()
                 .FirstOrDefaultAsync(p => p.ModId == modId && p.UserId == userId);
         }
@@ -35,9 +42,9 @@ namespace VUModManagerRegistry.Repositories
             return permission;
         }
 
-        public async Task<bool> DeleteByModAndUserIdAsync(long modId, long userId)
+        public async Task<bool> DeleteAsync(long modId, long userId, string tag)
         {
-            var permission = await FindByModAndUserIdAsync(modId, userId);
+            var permission = await FindAsync(modId, userId, tag);
             if (permission == null)
             {
                 return false;

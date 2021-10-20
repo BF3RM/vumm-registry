@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using VUModManagerRegistry.Authentication.Extensions;
@@ -7,27 +7,26 @@ using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
-    public class ModAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, Mod>
+    public class ModVersionAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement, ModVersion>
     {
         private readonly IModAuthorizationService _modAuthorizationService;
 
-        public ModAuthorizationHandler(IModAuthorizationService modAuthorizationService)
+        public ModVersionAuthorizationHandler(IModAuthorizationService modAuthorizationService)
         {
             _modAuthorizationService = modAuthorizationService;
         }
-
-        protected override async Task HandleRequirementAsync(
-            AuthorizationHandlerContext context, 
+        
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
             OperationAuthorizationRequirement requirement,
-            Mod resource)
+            ModVersion resource)
         {
             if (requirement.Name == ModOperations.Read.Name)
             {
-                if (!resource.IsPrivate)
+                if (resource.Mod != null && !resource.Mod.IsPrivate)
                 {
                     context.Succeed(requirement);
                 }
-                else if (await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(),
+                else if (await _modAuthorizationService.HasAnyPermissions(resource.ModId, context.User.Id(), resource.Tag,
                     ModPermission.Read, ModPermission.Write))
                 {
                     context.Succeed(requirement);
@@ -39,21 +38,12 @@ namespace VUModManagerRegistry.Services
             // Publish permission, check if user has that permission
             if (requirement.Name == ModOperations.Publish.Name)
             {
-                if (await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(),
+                if (await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(), resource.Tag,
                     ModPermission.Write))
                 {
                     context.Succeed(requirement);
                 }
             }
         }
-    }
-
-    public static class ModOperations
-    {
-        public static OperationAuthorizationRequirement Read =
-            new() {Name = nameof(Read)};
-
-        public static OperationAuthorizationRequirement Publish =
-            new() {Name = nameof(Publish)};
     }
 }

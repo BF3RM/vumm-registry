@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +20,10 @@ namespace VUModManagerRegistry.Models
         
         public bool IsPrivate { get; set; }
         
-        public virtual ICollection<ModVersion> Versions { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime LastUpdated { get; set; }
         
+        public virtual ICollection<ModVersion> Versions { get; set; }
         public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<ModUserPermission> UserPermissions { get; set; }
     }

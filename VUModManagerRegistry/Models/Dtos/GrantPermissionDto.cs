@@ -4,5 +4,6 @@ namespace VUModManagerRegistry.Models.Dtos
     {
         public string Username { get; set; }
         public ModPermission Permission { get; set; }
+        public string Tag { get; set; }
     }
 }
