@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Models;
@@ -16,6 +18,18 @@ namespace VUModManagerRegistry.Repositories
             return await Set
                 .Include(m => m.Mod)
                 .FirstOrDefaultAsync(m => m.Name == name && m.Version == version);
+        }
+        
+        public async Task<List<ModVersion>> FindAllowedVersions(string name, long userId)
+        {
+            var versions = from v in Set
+                join m in Context.Mods on v.ModId equals m.Id
+                from p in Context.ModUserPermissions
+                where !m.IsPrivate || v.ModId == p.ModId && (v.Tag == p.Tag || p.Tag == "")
+                where v.Name == name && p.UserId == userId
+                select v;
+
+            return await versions.ToListAsync();
         }
 
         public async Task<bool> ExistsByNameAndVersionAsync(string name, string version)

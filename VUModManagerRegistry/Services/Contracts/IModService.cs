@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
@@ -13,6 +14,14 @@ namespace VUModManagerRegistry.Services.Contracts
         /// <param name="name">mod name</param>
         /// <returns></returns>
         public Task<Mod> GetMod(string name);
+
+        /// <summary>
+        /// Get all allowed mod versions for a given user
+        /// </summary>
+        /// <param name="name">mod name</param>
+        /// <param name="userId">user id</param>
+        /// <returns></returns>
+        public Task<List<ModVersion>> GetAllowedModVersions(string name, long userId);
 
         /// <summary>
         /// Delete a mod by it's name

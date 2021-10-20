@@ -19,6 +19,7 @@ namespace VUModManagerRegistry.Controllers
     public class ModController : ControllerBase
     {
         private readonly IModService _modService;
+        // private readonly IModVersionCacheService _modVersionCacheService;
         private readonly IModUploadService _uploadService;
         private readonly IModAuthorizationService _modAuthorizationService;
         private readonly IAuthorizationService _authorizationService;
@@ -45,12 +46,15 @@ namespace VUModManagerRegistry.Controllers
             }
 
             var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Read);
-            if (authorizationResult.Succeeded)
+            if (!authorizationResult.Succeeded)
             {
-                return mod.ToDto();
+                return Forbid();
             }
+            
+            // Filter out non supported versions
+            mod.Versions = await _modService.GetAllowedModVersions(mod.Name, User.Id());
 
-            return Forbid();
+            return mod.ToDto();
         }
 
         [HttpGet("{modVersion}")]
@@ -138,19 +142,23 @@ namespace VUModManagerRegistry.Controllers
         [Authorize(Policy = "CanPublish")]
         public async Task<IActionResult> DeleteModVersion(string name, string modVersion)
         {
-            var foundVersion = await _modService.GetModVersion(name, modVersion);
-            if (foundVersion == null)
+            // Check permissions
+            var mod = await _modService.GetMod(name);
+            if (mod == null)
             {
                 return NotFound();
             }
             
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Publish);
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, mod, ModOperations.Publish);
             if (!authorizationResult.Succeeded)
             {
                 return Forbid();
             }
-
-            await _modService.DeleteModVersion(name, modVersion);
+            
+            if (!await _modService.DeleteModVersion(name, modVersion))
+            {
+                return NotFound();
+            }
 
             return NoContent();
         }
