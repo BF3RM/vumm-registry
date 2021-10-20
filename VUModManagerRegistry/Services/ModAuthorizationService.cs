@@ -50,9 +50,11 @@ namespace VUModManagerRegistry.Services
             {
                 userPermission.Permission = permission;
                 await _permissionRepository.UpdateAsync(userPermission);
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         public async Task<bool> SetPermission(long modId, long userId, ModPermission permission)

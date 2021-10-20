@@ -66,9 +66,9 @@ namespace VUModManagerRegistry.Tests.Services
         [TestCase(ModPermission.Read, false)]
         public async Task SetPermission_ShouldUpdateExistingPermissionIfDifferent(ModPermission setToPermission, bool changed)
         {
-            var modUserPermission = new ModUserPermission {Permission = ModPermission.Read};
+            var modUserPermission = new ModUserPermission {Permission = ModPermission.Read, Tag = ""};
             _repositoryMock
-                .Setup(r => r.FindAsync(ModId, UserId))
+                .Setup(r => r.FindAsync(ModId, UserId, ""))
                 .ReturnsAsync(modUserPermission);
             
             Assert.AreEqual(changed, await _service.SetPermission(ModId, UserId, setToPermission));
