@@ -15,16 +15,16 @@ namespace VUModManagerRegistry.Repositories
             _context = context;
         }
 
-        public async Task<ModUserPermission> FindAsync(long modId, long userId)
-        {
-            return await _context.Set<ModUserPermission>()
-                .FirstOrDefaultAsync(p => p.ModId == modId && p.UserId == userId);
-        }
-
         public async Task<ModUserPermission> FindAsync(long modId, long userId, params string[] tags)
         {
+            if (tags.Length > 0)
+            {
+                return await _context.Set<ModUserPermission>()
+                    .FirstOrDefaultAsync(p => p.ModId == modId && p.UserId == userId && tags.Contains(p.Tag));
+            }
+            
             return await _context.Set<ModUserPermission>()
-                .FirstOrDefaultAsync(p => p.ModId == modId && p.UserId == userId && tags.Contains(p.Tag));
+                .FirstOrDefaultAsync(p => p.ModId == modId && p.UserId == userId);
         }
 
         public async Task<ModUserPermission> AddAsync(ModUserPermission permission)

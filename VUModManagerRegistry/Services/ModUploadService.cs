@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
+    [ExcludeFromCodeCoverage]
     public class ModUploadService : IModUploadService
     {
         public async Task StoreModVersionArchive(string name, string version, Stream stream)

@@ -5,7 +5,6 @@ namespace VUModManagerRegistry.Repositories.Contracts
 {
     public interface IModUserPermissionRepository
     {
-        Task<ModUserPermission> FindAsync(long modId, long userId);
         Task<ModUserPermission> FindAsync(long modId, long userId, params string[] tags);
         Task<ModUserPermission> AddAsync(ModUserPermission permission);
         Task<ModUserPermission> UpdateAsync(ModUserPermission permission);
