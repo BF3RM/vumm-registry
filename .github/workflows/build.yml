@@ -38,4 +38,6 @@ jobs:
           dotnet test VUModManagerRegistry.Tests /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByFile="**/Migrations/*.cs"
 
       - name: End Sonar Scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
