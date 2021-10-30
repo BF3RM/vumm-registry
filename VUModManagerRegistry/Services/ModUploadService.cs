@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
-using VUModManagerRegistry.Services.Contracts;
+using VUModManagerRegistry.Common.Interfaces;
 
 namespace VUModManagerRegistry.Services
 {

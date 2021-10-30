@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VUModManagerRegistry.Authentication.Extensions;
-using VUModManagerRegistry.Exceptions;
+using VUModManagerRegistry.Common.Exceptions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Models.Extensions;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Controllers
 {

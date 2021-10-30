@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories.Contracts;
 
 namespace VUModManagerRegistry.Repositories
 {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
 
-namespace VUModManagerRegistry.Services.Contracts
+namespace VUModManagerRegistry.Common.Interfaces
 {
     public interface IAuthenticationService
     {

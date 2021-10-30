@@ -1,6 +1,6 @@
 using System;
 
-namespace VUModManagerRegistry.Exceptions
+namespace VUModManagerRegistry.Common.Exceptions
 {
     public class UserAlreadyExistsException : Exception
     {

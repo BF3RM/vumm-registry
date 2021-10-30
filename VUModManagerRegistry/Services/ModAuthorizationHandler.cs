@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using VUModManagerRegistry.Authentication.Extensions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {

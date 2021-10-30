@@ -2,12 +2,11 @@
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using VUModManagerRegistry.Exceptions;
+using VUModManagerRegistry.Common.Exceptions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
-using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Tests.Services
 {

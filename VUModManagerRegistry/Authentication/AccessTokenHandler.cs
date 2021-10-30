@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using IAuthenticationService = VUModManagerRegistry.Services.Contracts.IAuthenticationService;
+using IAuthenticationService = VUModManagerRegistry.Common.Interfaces.IAuthenticationService;
 
 namespace VUModManagerRegistry.Authentication
 {

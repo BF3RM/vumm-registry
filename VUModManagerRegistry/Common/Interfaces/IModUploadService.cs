@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace VUModManagerRegistry.Services.Contracts
+namespace VUModManagerRegistry.Common.Interfaces
 {
     public interface IModUploadService
     {

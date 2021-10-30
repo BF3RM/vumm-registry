@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using VUModManagerRegistry.Exceptions;
+using VUModManagerRegistry.Common.Exceptions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
-using VUModManagerRegistry.Repositories.Contracts;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {

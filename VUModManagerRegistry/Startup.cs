@@ -8,11 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VUModManagerRegistry.Authentication;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Repositories;
-using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry
 {
@@ -76,6 +75,7 @@ namespace VUModManagerRegistry
                 .AddScoped<IAuthenticationService, AuthenticationService>()
                 .AddScoped<IModAuthorizationService, ModAuthorizationService>()
                 .AddScoped<IModService, ModService>()
+                .AddScoped<IModStorage, S3ModStorage>()
                 .AddSingleton<IModUploadService, ModUploadService>();
         }
 
