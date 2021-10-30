@@ -77,12 +77,12 @@ namespace VUModManagerRegistry.Controllers
 
         [HttpPut("{modVersion}")]
         [Authorize(Policy = "CanPublish")]
-        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, [FromForm]ModVersionForm modVersionForm)
+        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, CreateModVersionRequest request)
         {
             name = name.ToLower();
-            modVersionForm.Attributes.Name = modVersionForm.Attributes.Name.ToLower();
+            request.Name = request.Name.ToLower();
             
-            if (name != modVersionForm.Attributes.Name || modVersion != modVersionForm.Attributes.Version)
+            if (name != request.Name || modVersion != request.Version)
             {
                 return BadRequest();
             }
@@ -100,10 +100,8 @@ namespace VUModManagerRegistry.Controllers
 
             try
             {
-                await using var memoryStream = new MemoryStream();
-                await modVersionForm.Archive.CopyToAsync(memoryStream);
                 var createdVersion =
-                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, User.Id(), memoryStream);
+                    await _modService.CreateModVersion(request, User.Id());
 
                 return CreatedAtAction(
                     nameof(GetModVersion),
@@ -112,34 +110,12 @@ namespace VUModManagerRegistry.Controllers
             }
             catch (ModVersionAlreadyExistsException ex)
             {
-                ModelState.AddModelError(nameof(modVersionForm.Attributes.Version), ex.Message);
+                ModelState.AddModelError(nameof(request.Version), ex.Message);
                 return Conflict(ModelState);
             }
         }
-
-        [HttpPost("{modVersion}/upload")]
-        [Authorize(Policy = "CanPublish")]
-        public async Task<ActionResult<ModVersionUrlDto>> GetModVersionUploadUrl(string name, string modVersion)
-        {
-            var foundVersion = await _modService.GetModVersion(name, modVersion);
-            if (foundVersion == null)
-            {
-                return NotFound();
-            }
-
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Publish);
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            return new ModVersionUrlDto
-            {
-                Url = _modStorage.GetUploadLink(foundVersion)
-            };
-        }
         
-        [HttpPost("{modVersion}/download")]
+        [HttpGet("{modVersion}/download")]
         public async Task<ActionResult<ModVersionUrlDto>> GetModVersionDownloadUrl(string name, string modVersion)
         {
             var foundVersion = await _modService.GetModVersion(name, modVersion);
@@ -156,7 +132,7 @@ namespace VUModManagerRegistry.Controllers
             
             return new ModVersionUrlDto
             {
-                Url = _modStorage.GetDownloadLink(foundVersion)
+                Url = _modStorage.GetArchiveDownloadLink(foundVersion.Name, foundVersion.Version)
             };
         }
 
