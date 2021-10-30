@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
@@ -82,7 +83,16 @@ namespace VUModManagerRegistry.Tests.Services
         [Test]
         public async Task CreateModVersion_CreatesModAndAddsPermissionsIfNotExists()
         {
-            var request = new CreateModVersionRequest {Name = ModName, Version = ModVersion, Tag = "latest"};
+            var request = new CreateModVersionRequest {
+                Name = ModName,
+                Version = ModVersion,
+                Tag = "latest",
+                Archive = new ModVersionArchive
+                {
+                    Length = 0,
+                    Data = ""
+                }
+            };
 
             Assert.IsNotNull(await _service.CreateModVersion(request, UserId));
             
@@ -91,14 +101,23 @@ namespace VUModManagerRegistry.Tests.Services
             _versionRepositoryMock.Verify(r =>
                 r.AddAsync(It.Is<ModVersion>(
                     v => v.Name == request.Name && v.Version == request.Version && v.Tag == "latest")));
-            _modStorage.Verify(s => s.StoreArchive(ModName, ModVersion, null));
+            _modStorage.Verify(s => s.StoreArchive(ModName, ModVersion, It.IsAny<Stream>()));
         }
 
         [Test]
         public async Task CreateModVersion_UsesExistingMod()
         {
             var mod = new Mod {Id = ModId, Name = ModName};
-            var request = new CreateModVersionRequest {Name = ModName, Version = ModVersion, Tag = "latest"};
+            var request = new CreateModVersionRequest {
+                Name = ModName,
+                Version = ModVersion,
+                Tag = "latest",
+                Archive = new ModVersionArchive
+                {
+                    Length = 0,
+                    Data = ""
+                }
+            };
             
             _modRepositoryMock.Setup(r => r.FindByNameAsync(ModName)).ReturnsAsync(mod);
 

@@ -6,6 +6,7 @@ using VUModManagerRegistry.Common.Interfaces;
 
 namespace VUModManagerRegistry.Services.S3
 {
+    [ExcludeFromCodeCoverage]
     public static class S3ServiceCollectionExtensions
     {
         public static IServiceCollection AddS3Storage(

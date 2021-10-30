@@ -9,6 +9,7 @@ using VUModManagerRegistry.Common.Interfaces;
 
 namespace VUModManagerRegistry.Services.S3
 {
+    [ExcludeFromCodeCoverage]
     public sealed class S3ModStorageOptions
     {
         public string ServiceURL { get; set; }
@@ -16,6 +17,8 @@ namespace VUModManagerRegistry.Services.S3
         [NotNull]
         public string BucketName { get; set; }
     }
+    
+    [ExcludeFromCodeCoverage]
     public class S3ModStorage : IModStorage
     {
         private readonly string _bucketName;
