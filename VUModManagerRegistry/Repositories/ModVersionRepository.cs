@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,14 +23,21 @@ namespace VUModManagerRegistry.Repositories
         
         public async Task<List<ModVersion>> FindAllowedVersions(string name, long userId)
         {
-            var versions = from v in Set
-                join m in Context.Mods on v.ModId equals m.Id
-                from p in Context.ModUserPermissions
-                where !m.IsPrivate || v.ModId == p.ModId && (v.Tag == p.Tag || p.Tag == "")
-                where v.Name == name && p.UserId == userId
-                select v;
+            var query = @"
+                SELECT MV.* FROM ""ModVersions"" as MV
+                LEFT JOIN ""ModUserPermissions"" as MUP
+                    ON MUP.""ModId"" = MV.""ModId""
+                    AND CASE
+                        WHEN MUP.""Tag"" = ''
+                            THEN 1
+                        WHEN MUP.""Tag"" = MV.""Tag""
+                            THEN 1
+                        ELSE 0
+                    END = 1
+                WHERE MUP.""UserId"" = {1} AND MV.""Name"" = {0}
+            ";
 
-            return await versions.ToListAsync();
+            return await Set.FromSqlRaw(query, name, userId).ToListAsync();
         }
 
         public async Task<bool> ExistsByNameAndVersionAsync(string name, string version)
