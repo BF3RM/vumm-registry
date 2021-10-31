@@ -25,16 +25,15 @@ namespace VUModManagerRegistry.Repositories
         {
             var query = @"
                 SELECT MV.* FROM ""ModVersions"" as MV
+                LEFT JOIN ""Mods"" as M ON M.""Id"" = MV.""ModId""
                 LEFT JOIN ""ModUserPermissions"" as MUP
                     ON MUP.""ModId"" = MV.""ModId""
                     AND CASE
-                        WHEN MUP.""Tag"" = ''
-                            THEN 1
-                        WHEN MUP.""Tag"" = MV.""Tag""
+                        WHEN MUP.""Tag"" = '' OR MUP.""Tag"" = MV.""Tag""
                             THEN 1
                         ELSE 0
                     END = 1
-                WHERE MUP.""UserId"" = {1} AND MV.""Name"" = {0}
+                WHERE MV.""Name"" = {0} AND (NOT M.""IsPrivate"" OR MUP.""UserId"" = {1})
             ";
 
             return await Set.FromSqlRaw(query, name, userId).ToListAsync();
