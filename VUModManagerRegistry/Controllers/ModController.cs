@@ -1,15 +1,12 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using VUModManagerRegistry.Authentication.Extensions;
-using VUModManagerRegistry.Exceptions;
-using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Common.Exceptions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Models.Extensions;
 using VUModManagerRegistry.Services;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Controllers
 {
@@ -19,19 +16,18 @@ namespace VUModManagerRegistry.Controllers
     public class ModController : ControllerBase
     {
         private readonly IModService _modService;
-        // private readonly IModVersionCacheService _modVersionCacheService;
-        private readonly IModUploadService _uploadService;
+        private readonly IModStorage _modStorage;
         private readonly IModAuthorizationService _modAuthorizationService;
         private readonly IAuthorizationService _authorizationService;
 
         public ModController(
             IModService modService,
-            IModUploadService uploadService,
+            IModStorage modStorage,
             IAuthorizationService authorizationService,
             IModAuthorizationService modAuthorizationService)
         {
             _modService = modService;
-            _uploadService = uploadService;
+            _modStorage = modStorage;
             _authorizationService = authorizationService;
             _modAuthorizationService = modAuthorizationService;
         }
@@ -66,7 +62,8 @@ namespace VUModManagerRegistry.Controllers
                 return NotFound();
             }
 
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
+            var authorizationResult =
+                await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
             if (!authorizationResult.Succeeded)
             {
                 return Forbid();
@@ -75,35 +72,12 @@ namespace VUModManagerRegistry.Controllers
             return foundVersion.ToDto();
         }
 
-        [HttpGet("{modVersion}/archive")]
-        public async Task<IActionResult> GetModVersionArchive(string name, string modVersion)
-        {
-            var foundVersion = await _modService.GetModVersion(name, modVersion);
-            if (foundVersion == null)
-            {
-                return NotFound();
-            }
-
-            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
-
-            var stream = _uploadService.GetModVersionArchive(foundVersion.Name, foundVersion.Version);
-            stream.Position = 0;
-            return File(stream, "application/octet-stream", "archive.tar.gz");
-        }
-        
-        
         [HttpPut("{modVersion}")]
         [Authorize(Policy = "CanPublish")]
-        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, [FromForm]ModVersionForm modVersionForm)
+        public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, CreateModVersionRequest request)
         {
             name = name.ToLower();
-            modVersionForm.Attributes.Name = modVersionForm.Attributes.Name.ToLower();
-            
-            if (name != modVersionForm.Attributes.Name || modVersion != modVersionForm.Attributes.Version)
+            if (name != request.Name.ToLower() || modVersion != request.Version)
             {
                 return BadRequest();
             }
@@ -121,10 +95,8 @@ namespace VUModManagerRegistry.Controllers
 
             try
             {
-                await using var memoryStream = new MemoryStream();
-                await modVersionForm.Archive.CopyToAsync(memoryStream);
                 var createdVersion =
-                    await _modService.CreateModVersion(modVersionForm.Attributes, modVersionForm.Tag, User.Id(), memoryStream);
+                    await _modService.CreateModVersion(request, User.Id());
 
                 return CreatedAtAction(
                     nameof(GetModVersion),
@@ -133,9 +105,29 @@ namespace VUModManagerRegistry.Controllers
             }
             catch (ModVersionAlreadyExistsException ex)
             {
-                ModelState.AddModelError(nameof(modVersionForm.Attributes.Version), ex.Message);
+                ModelState.AddModelError(nameof(request.Version), ex.Message);
                 return Conflict(ModelState);
             }
+        }
+        
+        [HttpGet("{modVersion}/download")]
+        public async Task<ActionResult> GetModVersionDownloadUrl(string name, string modVersion)
+        {
+            var foundVersion = await _modService.GetModVersion(name, modVersion);
+            if (foundVersion == null)
+            {
+                return NotFound();
+            }
+
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, foundVersion, ModOperations.Read);
+            if (!authorizationResult.Succeeded)
+            {
+                return Forbid();
+            }
+
+            var downloadLink = _modStorage.GetArchiveDownloadLink(foundVersion.Name, foundVersion.Version);
+
+            return Redirect(downloadLink);
         }
 
         [HttpDelete("{modVersion}")]

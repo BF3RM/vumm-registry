@@ -1,8 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories.Contracts;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {

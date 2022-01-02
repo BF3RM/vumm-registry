@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Tests.Services
 {

@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using VUModManagerRegistry.Exceptions;
+using VUModManagerRegistry.Common.Exceptions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
-using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Tests.Services
 {
@@ -23,7 +23,7 @@ namespace VUModManagerRegistry.Tests.Services
         private Mock<IModRepository> _modRepositoryMock;
         private Mock<IModVersionRepository> _versionRepositoryMock;
         private Mock<IModAuthorizationService> _authServiceMock;
-        private Mock<IModUploadService> _uploadServiceMock;
+        private Mock<IModStorage> _modStorage;
 
         [SetUp]
         public void Setup()
@@ -31,8 +31,8 @@ namespace VUModManagerRegistry.Tests.Services
             _modRepositoryMock = new Mock<IModRepository>();
             _versionRepositoryMock = new Mock<IModVersionRepository>();
             _authServiceMock = new Mock<IModAuthorizationService>();
-            _uploadServiceMock = new Mock<IModUploadService>();
-            _service = new ModService(_modRepositoryMock.Object, _versionRepositoryMock.Object, _authServiceMock.Object, _uploadServiceMock.Object);
+            _modStorage = new Mock<IModStorage>();
+            _service = new ModService(_modRepositoryMock.Object, _versionRepositoryMock.Object, _modStorage.Object, _authServiceMock.Object);
         }
 
         [Test]
@@ -70,38 +70,58 @@ namespace VUModManagerRegistry.Tests.Services
         [Test]
         public void CreateModVersion_ThrowsExceptionIfAlreadyExists()
         {
-            var dto = new ModVersionDto {Name = ModName, Version = ModVersion};
+            var request = new CreateModVersionRequest {Name = ModName, Version = ModVersion, Tag = "latest"};
+            
             _versionRepositoryMock
                 .Setup(r => r.ExistsByNameAndVersionAsync(ModName, ModVersion))
                 .ReturnsAsync(true);
 
             Assert.ThrowsAsync<ModVersionAlreadyExistsException>(async () =>
-                await _service.CreateModVersion(dto, "latest", UserId, null));
+                await _service.CreateModVersion(request, UserId));
         }
 
         [Test]
         public async Task CreateModVersion_CreatesModAndAddsPermissionsIfNotExists()
         {
-            var dto = new ModVersionDto {Name = ModName, Version = ModVersion};
+            var request = new CreateModVersionRequest {
+                Name = ModName,
+                Version = ModVersion,
+                Tag = "latest",
+                Archive = new ModVersionArchive
+                {
+                    Length = 0,
+                    Data = ""
+                }
+            };
 
-            Assert.IsNotNull(await _service.CreateModVersion(dto, "latest", UserId, null));
+            Assert.IsNotNull(await _service.CreateModVersion(request, UserId));
             
-            _modRepositoryMock.Verify(r => r.AddAsync(It.Is<Mod>(m => m.Name == dto.Name)));
+            _modRepositoryMock.Verify(r => r.AddAsync(It.Is<Mod>(m => m.Name == request.Name)));
             _authServiceMock.Verify(s => s.SetPermission(0, UserId, ModPermission.Write));
             _versionRepositoryMock.Verify(r =>
                 r.AddAsync(It.Is<ModVersion>(
-                    v => v.Name == dto.Name && v.Version == dto.Version && v.Tag == "latest")));
-            _uploadServiceMock.Verify(s => s.StoreModVersionArchive(ModName, ModVersion, null));
+                    v => v.Name == request.Name && v.Version == request.Version && v.Tag == "latest")));
+            _modStorage.Verify(s => s.StoreArchive(ModName, ModVersion, It.IsAny<Stream>()));
         }
 
         [Test]
         public async Task CreateModVersion_UsesExistingMod()
         {
             var mod = new Mod {Id = ModId, Name = ModName};
-            var dto = new ModVersionDto {Name = ModName, Version = ModVersion};
+            var request = new CreateModVersionRequest {
+                Name = ModName,
+                Version = ModVersion,
+                Tag = "latest",
+                Archive = new ModVersionArchive
+                {
+                    Length = 0,
+                    Data = ""
+                }
+            };
+            
             _modRepositoryMock.Setup(r => r.FindByNameAsync(ModName)).ReturnsAsync(mod);
 
-            var version = await _service.CreateModVersion(dto, "latest", UserId, null);
+            var version = await _service.CreateModVersion(request, UserId);
             
             Assert.AreEqual(ModId, version.ModId);
         }

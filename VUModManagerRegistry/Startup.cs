@@ -8,11 +8,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VUModManagerRegistry.Authentication;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Repositories;
-using VUModManagerRegistry.Repositories.Contracts;
 using VUModManagerRegistry.Services;
-using VUModManagerRegistry.Services.Contracts;
+using VUModManagerRegistry.Services.S3;
 
 namespace VUModManagerRegistry
 {
@@ -49,6 +49,12 @@ namespace VUModManagerRegistry
                 options.ReportApiVersions = true;
             });
 
+            // Common
+            services.AddSingleton<ISystemTimeProvider, SystemTimeProvider>();
+            
+            // Storage
+            services.AddS3Storage(Configuration.GetSection("S3Storage"));
+            
             // AuthenticationScheme
             services
                 .AddAuthentication(AccessTokenDefaults.AuthenticationScheme)
@@ -76,7 +82,7 @@ namespace VUModManagerRegistry
                 .AddScoped<IAuthenticationService, AuthenticationService>()
                 .AddScoped<IModAuthorizationService, ModAuthorizationService>()
                 .AddScoped<IModService, ModService>()
-                .AddSingleton<IModUploadService, ModUploadService>();
+                .AddScoped<IModStorage, S3ModStorage>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

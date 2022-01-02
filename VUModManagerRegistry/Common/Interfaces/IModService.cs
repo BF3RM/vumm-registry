@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
 
-namespace VUModManagerRegistry.Services.Contracts
+namespace VUModManagerRegistry.Common.Interfaces
 {
     public interface IModService
     {
@@ -33,12 +33,10 @@ namespace VUModManagerRegistry.Services.Contracts
         /// <summary>
         /// Create a new mod version
         /// </summary>
-        /// <param name="modVersion">mod version</param>
-        /// <param name="tag">mod version tag</param>
+        /// <param name="request">mod version request</param>
         /// <param name="userId">user id</param>
-        /// <param name="stream">mod version archive stream</param>
         /// <returns></returns>
-        public Task<ModVersion> CreateModVersion(ModVersionDto modVersion, string tag, long userId, Stream stream);
+        public Task<ModVersion> CreateModVersion(CreateModVersionRequest request, long userId);
 
         /// <summary>
         /// Check whether a mod version exists

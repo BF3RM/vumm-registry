@@ -1,8 +1,8 @@
 ﻿namespace VUModManagerRegistry.Models.Dtos
 {
-    public class RevokePermissionDto
+    public record RevokePermissionDto
     {
-        public string Username { get; set; }
-        public string Tag { get; set; }
+        public string Username { get; init; }
+        public string Tag { get; init; }
     }
 }

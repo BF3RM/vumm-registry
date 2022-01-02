@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using VUModManagerRegistry.Authentication.Extensions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
@@ -37,23 +37,21 @@ namespace VUModManagerRegistry.Services
             }
 
             // Publish permission, check if user has that permission
-            if (requirement.Name == ModOperations.Publish.Name)
-            {
-                if (await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(),
+            if (requirement.Name == ModOperations.Publish.Name &&
+                await _modAuthorizationService.HasAnyPermissions(resource.Id, context.User.Id(), 
                     ModPermission.Write))
-                {
-                    context.Succeed(requirement);
-                }
+            {
+                context.Succeed(requirement);
             }
         }
     }
 
     public static class ModOperations
     {
-        public static OperationAuthorizationRequirement Read =
+        public static readonly OperationAuthorizationRequirement Read =
             new() {Name = nameof(Read)};
 
-        public static OperationAuthorizationRequirement Publish =
+        public static readonly OperationAuthorizationRequirement Publish =
             new() {Name = nameof(Publish)};
     }
 }

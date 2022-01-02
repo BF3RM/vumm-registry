@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using VUModManagerRegistry.Exceptions;
+using VUModManagerRegistry.Common.Exceptions;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
-using VUModManagerRegistry.Repositories.Contracts;
-using VUModManagerRegistry.Services.Contracts;
 
 namespace VUModManagerRegistry.Services
 {
@@ -13,15 +13,19 @@ namespace VUModManagerRegistry.Services
     {
         private readonly IModRepository _modRepository;
         private readonly IModVersionRepository _modVersionRepository;
+        private readonly IModStorage _modStorage;
         private readonly IModAuthorizationService _modAuthorizationService;
-        private readonly IModUploadService _uploadService;
 
-        public ModService(IModRepository modRepository, IModVersionRepository modVersionRepository, IModAuthorizationService modAuthorizationService, IModUploadService uploadService)
+        public ModService(
+            IModRepository modRepository,
+            IModVersionRepository modVersionRepository,
+            IModStorage modStorage,
+            IModAuthorizationService modAuthorizationService)
         {
             _modRepository = modRepository;
             _modVersionRepository = modVersionRepository;
+            _modStorage = modStorage;
             _modAuthorizationService = modAuthorizationService;
-            _uploadService = uploadService;
         }
 
         public Task<Mod> GetMod(string name)
@@ -39,30 +43,34 @@ namespace VUModManagerRegistry.Services
             return _modRepository.DeleteByNameAsync(name);
         }
 
-        public async Task<ModVersion> CreateModVersion(ModVersionDto modVersionDto, string tag, long userId,
-            Stream stream)
+        public async Task<ModVersion> CreateModVersion(CreateModVersionRequest request, long userId)
         {
-            if (await ModVersionExists(modVersionDto.Name, modVersionDto.Version))
+            var name = request.Name.ToLower();
+            if (await ModVersionExists(name, request.Version))
             {
-                throw new ModVersionAlreadyExistsException(modVersionDto.Name, modVersionDto.Version);
+                throw new ModVersionAlreadyExistsException(name, request.Version);
             }
 
             // Get or create the mod
-            var mod = await _CreateOrGetMod(modVersionDto.Name, userId);
-            
+            var mod = await _CreateOrGetMod(name, userId);
+
+            // TODO: Check if length is the same as reported by cli.
+            var bytes = Convert.FromBase64String(request.Archive.Data);
+            await using (var stream = new MemoryStream(bytes))
+            {
+                await _modStorage.StoreArchive(mod.Name, request.Version, stream);
+            }
+
             // Create mod version
             var modVersion = new ModVersion
             {
-                Name = modVersionDto.Name,
-                Version = modVersionDto.Version,
-                Dependencies = modVersionDto.Dependencies,
-                Tag = tag,
+                Name = mod.Name,
+                Version = request.Version,
+                Dependencies = request.Dependencies,
+                Tag = request.Tag,
                 ModId = mod.Id
             };
             await _modVersionRepository.AddAsync(modVersion);
-
-            // Upload the archive
-            await _uploadService.StoreModVersionArchive(modVersionDto.Name, modVersionDto.Version, stream);
 
             return modVersion;
         }
@@ -79,6 +87,8 @@ namespace VUModManagerRegistry.Services
 
         public async Task<bool> DeleteModVersion(string name, string version)
         {
+            await _modStorage.DeleteArchive(name, version);
+            
             var deleted = await _modVersionRepository.DeleteByNameAndVersionAsync(name, version);
             if (!deleted)
             {
@@ -90,8 +100,6 @@ namespace VUModManagerRegistry.Services
             {
                 await _modRepository.DeleteByIdAsync(mod.Id);
             }
-
-            _uploadService.DeleteModVersionArchive(name, version);
 
             return true;
         }
