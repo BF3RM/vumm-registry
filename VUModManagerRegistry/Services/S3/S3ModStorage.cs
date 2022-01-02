@@ -21,13 +21,15 @@ namespace VUModManagerRegistry.Services.S3
     [ExcludeFromCodeCoverage]
     public class S3ModStorage : IModStorage
     {
-        private readonly string _bucketName;
+        private readonly ISystemTimeProvider _systemTimeProvider;
         private readonly AmazonS3Client _s3Client;
+        private readonly string _bucketName;
 
-        public S3ModStorage(IOptions<S3ModStorageOptions> options)
+        public S3ModStorage(ISystemTimeProvider systemTimeProvider, IOptions<S3ModStorageOptions> options)
         {
-            _bucketName = options.Value.BucketName;
+            _systemTimeProvider = systemTimeProvider;
             _s3Client = new AmazonS3Client(new AmazonS3Config { ServiceURL = options.Value.ServiceURL });
+            _bucketName = options.Value.BucketName;
         }
 
         public async Task StoreArchive(string modName, string modVersion, Stream stream)
@@ -55,7 +57,7 @@ namespace VUModManagerRegistry.Services.S3
             return _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
             {
                 BucketName = _bucketName,
-                Expires = DateTime.UtcNow.AddSeconds(30),
+                Expires = _systemTimeProvider.Now.AddSeconds(30),
                 Key = CreateModVersionKey(modName, modVersion),
                 Verb = HttpVerb.GET
             });

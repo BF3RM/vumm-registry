@@ -49,6 +49,9 @@ namespace VUModManagerRegistry
                 options.ReportApiVersions = true;
             });
 
+            // Common
+            services.AddSingleton<ISystemTimeProvider, SystemTimeProvider>();
+            
             // Storage
             services.AddS3Storage(Configuration.GetSection("S3Storage"));
             
