@@ -1,9 +1,9 @@
 namespace VUModManagerRegistry.Models.Dtos
 {
-    public class GrantPermissionDto
+    public record GrantPermissionDto
     {
-        public string Username { get; set; }
-        public ModPermission Permission { get; set; }
-        public string Tag { get; set; }
+        public string Username { get; init; }
+        public ModPermission Permission { get; init; }
+        public string Tag { get; init; }
     }
 }

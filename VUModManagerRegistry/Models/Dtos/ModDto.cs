@@ -2,12 +2,12 @@
 
 namespace VUModManagerRegistry.Models.Dtos
 {
-    public class ModDto
+    public record ModDto
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Author { get; set; }
-        public Dictionary<string, string> Tags { get; set; }
-        public Dictionary<string, ModVersionDto> Versions { get; set; }
+        public string Name { get; init; }
+        public string Description { get; init; }
+        public string Author { get; init; }
+        public Dictionary<string, string> Tags { get; init; }
+        public Dictionary<string, ModVersionDto> Versions { get; init; }
     }
 }

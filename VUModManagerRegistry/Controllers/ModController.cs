@@ -1,12 +1,9 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using VUModManagerRegistry.Authentication.Extensions;
 using VUModManagerRegistry.Common.Exceptions;
 using VUModManagerRegistry.Common.Interfaces;
-using VUModManagerRegistry.Models;
 using VUModManagerRegistry.Models.Dtos;
 using VUModManagerRegistry.Models.Extensions;
 using VUModManagerRegistry.Services;
@@ -80,9 +77,7 @@ namespace VUModManagerRegistry.Controllers
         public async Task<ActionResult<ModVersionDto>> PutModVersion(string name, string modVersion, CreateModVersionRequest request)
         {
             name = name.ToLower();
-            request.Name = request.Name.ToLower();
-            
-            if (name != request.Name || modVersion != request.Version)
+            if (name != request.Name.ToLower() || modVersion != request.Version)
             {
                 return BadRequest();
             }
@@ -116,7 +111,7 @@ namespace VUModManagerRegistry.Controllers
         }
         
         [HttpGet("{modVersion}/download")]
-        public async Task<ActionResult<ModVersionUrlDto>> GetModVersionDownloadUrl(string name, string modVersion)
+        public async Task<ActionResult> GetModVersionDownloadUrl(string name, string modVersion)
         {
             var foundVersion = await _modService.GetModVersion(name, modVersion);
             if (foundVersion == null)
@@ -129,11 +124,10 @@ namespace VUModManagerRegistry.Controllers
             {
                 return Forbid();
             }
-            
-            return new ModVersionUrlDto
-            {
-                Url = _modStorage.GetArchiveDownloadLink(foundVersion.Name, foundVersion.Version)
-            };
+
+            var downloadLink = _modStorage.GetArchiveDownloadLink(foundVersion.Name, foundVersion.Version);
+
+            return Redirect(downloadLink);
         }
 
         [HttpDelete("{modVersion}")]

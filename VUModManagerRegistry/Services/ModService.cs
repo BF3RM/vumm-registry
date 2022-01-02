@@ -45,13 +45,14 @@ namespace VUModManagerRegistry.Services
 
         public async Task<ModVersion> CreateModVersion(CreateModVersionRequest request, long userId)
         {
-            if (await ModVersionExists(request.Name, request.Version))
+            var name = request.Name.ToLower();
+            if (await ModVersionExists(name, request.Version))
             {
-                throw new ModVersionAlreadyExistsException(request.Name, request.Version);
+                throw new ModVersionAlreadyExistsException(name, request.Version);
             }
 
             // Get or create the mod
-            var mod = await _CreateOrGetMod(request.Name, userId);
+            var mod = await _CreateOrGetMod(name, userId);
 
             // TODO: Check if length is the same as reported by cli.
             var bytes = Convert.FromBase64String(request.Archive.Data);
@@ -63,7 +64,7 @@ namespace VUModManagerRegistry.Services
             // Create mod version
             var modVersion = new ModVersion
             {
-                Name = request.Name,
+                Name = mod.Name,
                 Version = request.Version,
                 Dependencies = request.Dependencies,
                 Tag = request.Tag,

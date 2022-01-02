@@ -2,22 +2,21 @@
 
 namespace VUModManagerRegistry.Models.Dtos
 {
-    public class ModVersionArchive
+    public record ModVersionArchive
     {
-        public string ContentType { get; set; }
-        public string Data { get; set; }
-        public int Length { get; set; }
+        public string ContentType { get; init; }
+        public string Data { get; init; }
+        public int Length { get; init; }
     }
-    public class CreateModVersionRequest
+    
+    public record CreateModVersionRequest
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Author { get; set; }
-        public string Version { get; set; }
-        public string Tag { get; set; }
-        public Dictionary<string, string> Dependencies { get; set; }
-
-        public ModVersionArchive Archive { get; set; }
-        
+        public string Name { get; init; }
+        public string Description { get; init; }
+        public string Author { get; init; }
+        public string Version { get; init; }
+        public string Tag { get; init; }
+        public Dictionary<string, string> Dependencies { get; init; }
+        public ModVersionArchive Archive { get; init; }
     }
 }
