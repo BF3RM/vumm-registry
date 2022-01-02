@@ -1,15 +1,15 @@
 ﻿# https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS builder
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
-COPY *.sln .
-COPY VUModManagerRegistry/*.csproj ./VUModManagerRegistry/
+COPY VUModManagerRegistry/*.csproj ./
 RUN dotnet restore
 
+FROM builder AS build
 # copy everything else and build app
-COPY VUModManagerRegistry/. ./VUModManagerRegistry/
-WORKDIR /source/VUModManagerRegistry
+WORKDIR /source
+COPY VUModManagerRegistry/. ./
 RUN dotnet publish -c release -o /app --no-restore
 
 # final stage/image
