@@ -27,7 +27,7 @@ namespace VUModManagerRegistry.Repositories
                 SELECT MV.* FROM ""ModVersions"" as MV
                 LEFT JOIN ""Mods"" as M ON M.""Id"" = MV.""ModId""
                 LEFT JOIN ""ModUserPermissions"" as MUP
-                    ON MUP.""ModId"" = MV.""ModId""
+                    ON MUP.""ModId"" = MV.""ModId"" AND MUP.""UserId"" = {1}
                     AND CASE
                         WHEN MUP.""Tag"" = '' OR MUP.""Tag"" = MV.""Tag""
                             THEN 1
