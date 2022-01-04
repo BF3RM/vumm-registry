@@ -45,6 +45,17 @@ namespace VUModManagerRegistry.Tests.Services
             
             Assert.AreEqual(mod, await _service.GetMod(ModName));
         }
+
+        [Test]
+        public async Task GetAllVersions_PassesThroughRepository()
+        {
+            var versions = new List<ModVersion>() {new() {Name = ModName}};
+            _versionRepositoryMock
+                .Setup(r => r.FindAllAsync(ModName))
+                .ReturnsAsync(versions);
+            
+            Assert.AreEqual(versions, await _service.GetAllModVersions(ModName));
+        }
         
         [Test]
         public async Task GetAllowedModVersions_PassesThroughRepository()

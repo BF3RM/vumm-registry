@@ -16,6 +16,13 @@ namespace VUModManagerRegistry.Common.Interfaces
         public Task<Mod> GetMod(string name);
 
         /// <summary>
+        /// Get all mod versions of a given mod
+        /// </summary>
+        /// <param name="name">mod name</param>
+        /// <returns></returns>
+        public Task<List<ModVersion>> GetAllModVersions(string name);
+        
+        /// <summary>
         /// Get all allowed mod versions for a given user
         /// </summary>
         /// <param name="name">mod name</param>

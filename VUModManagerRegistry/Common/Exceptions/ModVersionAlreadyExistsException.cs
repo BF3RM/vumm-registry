@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 
 namespace VUModManagerRegistry.Common.Exceptions
@@ -11,6 +12,7 @@ namespace VUModManagerRegistry.Common.Exceptions
         {
         }
 
+        [ExcludeFromCodeCoverage]
         protected ModVersionAlreadyExistsException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
