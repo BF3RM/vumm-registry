@@ -19,7 +19,7 @@ namespace VUModManagerRegistry.Models
         public DbSet<User> Users { get; set; }
         public DbSet<UserAccessToken> AccessTokens { get; set; }
 
-        private ISystemTimeProvider _systemTimeProvider;
+        private readonly ISystemTimeProvider _systemTimeProvider;
         public AppDbContext(ISystemTimeProvider systemTimeProvider, DbContextOptions<AppDbContext> options)
             : base(options)
         {
