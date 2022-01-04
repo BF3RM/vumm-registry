@@ -33,6 +33,11 @@ namespace VUModManagerRegistry.Services
             return _modRepository.FindByNameAsync(name);
         }
 
+        public Task<List<ModVersion>> GetAllModVersions(string name)
+        {
+            return _modVersionRepository.FindAllAsync(name);
+        }
+
         public Task<List<ModVersion>> GetAllowedModVersions(string name, long userId)
         {
             return _modVersionRepository.FindAllowedVersions(name, userId);

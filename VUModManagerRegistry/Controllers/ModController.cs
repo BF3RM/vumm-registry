@@ -46,8 +46,17 @@ namespace VUModManagerRegistry.Controllers
             {
                 return Forbid();
             }
+
+            if (mod.IsPrivate)
+            {
+                // Only retrieve allowed mod versions
+                mod.Versions = await _modService.GetAllowedModVersions(mod.Name, User.Id());
+            }
+            else
+            {
+                mod.Versions = await _modService.GetAllModVersions(mod.Name);
+            }
             
-            // Filter out non supported versions
             mod.Versions = await _modService.GetAllowedModVersions(mod.Name, User.Id());
 
             return mod.ToDto();
