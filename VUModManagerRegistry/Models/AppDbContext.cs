@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VUModManagerRegistry.Common.Interfaces;
 using VUModManagerRegistry.Helpers;
 
 namespace VUModManagerRegistry.Models
@@ -17,9 +19,11 @@ namespace VUModManagerRegistry.Models
         public DbSet<User> Users { get; set; }
         public DbSet<UserAccessToken> AccessTokens { get; set; }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        private ISystemTimeProvider _systemTimeProvider;
+        public AppDbContext(ISystemTimeProvider systemTimeProvider, DbContextOptions<AppDbContext> options)
             : base(options)
         {
+            _systemTimeProvider = systemTimeProvider;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -82,7 +86,7 @@ namespace VUModManagerRegistry.Models
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
-            var now = DateTime.UtcNow;
+            var now = _systemTimeProvider.Now;
 
             foreach (var entry in ChangeTracker.Entries())
             {

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using VUModManagerRegistry.Models;
+using VUModManagerRegistry.Services;
 
 namespace VUModManagerRegistry.Tests
 {
@@ -12,6 +13,7 @@ namespace VUModManagerRegistry.Tests
         public void CreateContext()
         {
             Context = new AppDbContext(
+                new SystemTimeProvider(),
                 new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase("TestDb").Options);
         }
     }
