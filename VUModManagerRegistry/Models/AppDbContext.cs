@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VUModManagerRegistry.Helpers;
 
@@ -78,7 +80,7 @@ namespace VUModManagerRegistry.Models
             });
         }
 
-        public override int SaveChanges()
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
             var now = DateTime.UtcNow;
 
@@ -100,7 +102,7 @@ namespace VUModManagerRegistry.Models
                 }
             }
             
-            return base.SaveChanges();
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }
