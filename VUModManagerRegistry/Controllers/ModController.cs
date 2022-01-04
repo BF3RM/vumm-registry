@@ -56,8 +56,6 @@ namespace VUModManagerRegistry.Controllers
             {
                 mod.Versions = await _modService.GetAllModVersions(mod.Name);
             }
-            
-            mod.Versions = await _modService.GetAllowedModVersions(mod.Name, User.Id());
 
             return mod.ToDto();
         }
