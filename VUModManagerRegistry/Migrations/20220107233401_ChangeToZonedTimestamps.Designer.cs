@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VUModManagerRegistry.Models;
@@ -12,9 +13,10 @@ using VUModManagerRegistry.Models;
 namespace VUModManagerRegistry.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class RegistryContextModelSnapshot : ModelSnapshot
+    [Migration("20220107233401_ChangeToZonedTimestamps")]
+    partial class ChangeToZonedTimestamps
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,8 +93,8 @@ namespace VUModManagerRegistry.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Dictionary<string, string>>("Dependencies")
-                        .HasColumnType("jsonb");
+                    b.Property<string>("Dependencies")
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");

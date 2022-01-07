@@ -1,9 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,9 +32,16 @@ namespace VUModManagerRegistry
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = Configuration.GetSection("Limits")
+                    .GetValue<long>("MaxRequestBodySize");
+            });
+            
             services.Configure<JsonSerializerOptions>(options =>
             {
-                options.IgnoreNullValues = true;
+                options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 options.PropertyNameCaseInsensitive = true;
             });
             
@@ -43,7 +52,7 @@ namespace VUModManagerRegistry
             
             services.AddControllers().AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.IgnoreNullValues = true;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddApiVersioning(options =>

@@ -68,11 +68,7 @@ namespace VUModManagerRegistry.Models
             {
                 entity
                     .Property(v => v.Dependencies)
-                    .HasConversion(
-                        v => JsonSerializer.Serialize(v, null),
-                        v => JsonSerializer.Deserialize<Dictionary<string, string>>(v, null)
-                    )
-                    .Metadata.SetValueComparer(DictionaryHelpers.StringValueComparer);
+                    .HasColumnType("jsonb");
 
                 entity.HasOne(mp => mp.Mod)
                     .WithMany(m => m.Versions)
