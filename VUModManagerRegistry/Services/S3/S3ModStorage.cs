@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,9 +13,9 @@ namespace VUModManagerRegistry.Services.S3
     [ExcludeFromCodeCoverage]
     public sealed class S3ModStorageOptions
     {
-        public string ServiceURL { get; set; }
-        
-        [NotNull]
+        public string ServiceUrl { get; set; }
+
+        [Required]
         public string BucketName { get; set; }
     }
     
@@ -28,7 +29,7 @@ namespace VUModManagerRegistry.Services.S3
         public S3ModStorage(ISystemTimeProvider systemTimeProvider, IOptions<S3ModStorageOptions> options)
         {
             _systemTimeProvider = systemTimeProvider;
-            _s3Client = new AmazonS3Client(new AmazonS3Config { ServiceURL = options.Value.ServiceURL });
+            _s3Client = string.IsNullOrEmpty(options.Value.ServiceUrl) ? new AmazonS3Client() : new AmazonS3Client(new AmazonS3Config {ServiceURL = options.Value.ServiceUrl});
             _bucketName = options.Value.BucketName;
         }
 

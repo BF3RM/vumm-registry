@@ -12,9 +12,7 @@ namespace VUModManagerRegistry.Tests
         [SetUp]
         public void CreateContext()
         {
-            Context = new AppDbContext(
-                new SystemTimeProvider(),
-                new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase("TestDb").Options);
+            Context = new AppTestDbContext();
         }
     }
 }

@@ -13,7 +13,8 @@ namespace VUModManagerRegistry.Services.S3
             [NotNull] this IServiceCollection serviceCollection,
             IConfiguration configuration)
         {
-            serviceCollection.Configure<S3ModStorageOptions>(configuration);
+            serviceCollection.AddOptions<S3ModStorageOptions>().Bind(configuration)
+                .ValidateDataAnnotations().ValidateOnStart();
             serviceCollection.AddSingleton<IModStorage, S3ModStorage>();
 
             return serviceCollection;
