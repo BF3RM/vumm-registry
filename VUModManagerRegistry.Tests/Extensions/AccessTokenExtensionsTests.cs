@@ -50,7 +50,7 @@ namespace VUModManagerRegistry.Tests.Extensions
         {
             Assert.AreEqual(accessToken.Type, dto.Type);
             Assert.AreEqual(accessToken.Token, dto.Token);
-            Assert.AreEqual(accessToken.CreatedAt, dto.CreatedAt);
+            Assert.AreEqual(accessToken.Created, dto.CreatedAt);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace VUModManagerRegistry.Models.Extensions
             {
                 Type = userAccessToken.Type,
                 Token = userAccessToken.Token,
-                CreatedAt = userAccessToken.CreatedAt
+                CreatedAt = userAccessToken.Created
             };
 
         /// <summary>

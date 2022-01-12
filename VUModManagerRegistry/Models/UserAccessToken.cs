@@ -28,13 +28,5 @@ namespace VUModManagerRegistry.Models
         
         [Required]
         public AccessTokenType Type { get; set; }
-        
-        [Required]
-        public DateTime CreatedAt { get; set; }
-
-        public UserAccessToken()
-        {
-            CreatedAt = DateTime.Now;
-        }
     }
 }
